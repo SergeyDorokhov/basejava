@@ -8,7 +8,7 @@ public class ArrayStorage {
     private int resumesNumber;
 
     public void clear() {
-        Arrays.fill(storage, 0, resumesNumber,null);
+        Arrays.fill(storage, 0, resumesNumber, null);
         resumesNumber = 0;
     }
 
@@ -17,13 +17,12 @@ public class ArrayStorage {
     }
 
     public Resume get(String uuid) {
-        Resume result = null;
         for (int i = 0; i < resumesNumber; i++) {
             if (storage[i].getUuid().equals(uuid)) {
-                result = storage[i];
+                return storage[i];
             }
         }
-        return result;
+        return null;
     }
 
     public void delete(String uuid) {
