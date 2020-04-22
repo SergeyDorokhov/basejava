@@ -1,3 +1,7 @@
+package ru.topjava.basejava.storage;
+
+import ru.topjava.basejava.model.Resume;
+
 import java.util.Arrays;
 
 /**

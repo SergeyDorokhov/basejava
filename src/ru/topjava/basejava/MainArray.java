@@ -1,9 +1,14 @@
+package ru.topjava.basejava;
+
+import ru.topjava.basejava.model.Resume;
+import ru.topjava.basejava.storage.ArrayStorage;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Interactive test for ArrayStorage implementation
+ * Interactive test for ru.topjava.basejava.storage.ArrayStorage implementation
  * (just run, no need to understand)
  */
 public class MainArray {
