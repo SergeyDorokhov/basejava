@@ -8,7 +8,7 @@ import java.util.Arrays;
  * Array based storage for Resumes
  */
 public class ArrayStorage {
-    private Resume[] storage = new Resume[10000];
+    private Resume[] storage = new Resume[10_000];
     private int resumesNumber;
 
     public void clear() {
@@ -16,12 +16,12 @@ public class ArrayStorage {
         resumesNumber = 0;
     }
 
-    public void save(Resume r) {
-        if (resumesNumber <= storage.length - 1) {
-            if (getResumeIndex(r.getUuid()) == -1) {
-                storage[resumesNumber++] = r;
+    public void save(Resume resume) {
+        if (resumesNumber < storage.length) {
+            if (getResumeIndex(resume.getUuid()) == -1) {
+                storage[resumesNumber++] = resume;
             } else {
-                System.out.println("Resume exists");
+                System.out.println("Resume " + resume.getUuid() + " exists");
             }
         } else {
             System.out.println("Storage is full");
@@ -32,18 +32,17 @@ public class ArrayStorage {
         int index = getResumeIndex(uuid);
         if (index != -1) {
             return storage[index];
-        } else {
-            System.out.println("Resume not exists");
         }
+        System.out.println("Resume " + uuid + " not exists");
         return null;
     }
 
-    public void update(Resume r) {
-        int index = getResumeIndex(r.getUuid());
+    public void update(Resume resume) {
+        int index = getResumeIndex(resume.getUuid());
         if (index != -1) {
-            storage[index] = r;
+            storage[index] = resume;
         } else {
-            System.out.println("Resume not exists");
+            System.out.println("Resume " + resume.getUuid() + " not exists");
         }
     }
 
@@ -54,7 +53,7 @@ public class ArrayStorage {
             storage[resumesNumber - 1] = null;
             resumesNumber--;
         } else {
-            System.out.println("Resume not exists");
+            System.out.println("Resume " + uuid + " not exists");
         }
     }
 
