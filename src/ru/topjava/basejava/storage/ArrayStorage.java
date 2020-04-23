@@ -17,26 +17,44 @@ public class ArrayStorage {
     }
 
     public void save(Resume r) {
-        storage[resumesNumber++] = r;
+        if (resumesNumber <= storage.length - 1) {
+            if (getResumeIndex(r.getUuid()) == -1) {
+                storage[resumesNumber++] = r;
+            } else {
+                System.out.println("Resume exists");
+            }
+        } else {
+            System.out.println("Storage is full");
+        }
     }
 
     public Resume get(String uuid) {
-        for (int i = 0; i < resumesNumber; i++) {
-            if (storage[i].getUuid().equals(uuid)) {
-                return storage[i];
-            }
+        int index = getResumeIndex(uuid);
+        if (index != -1) {
+            return storage[index];
+        } else {
+            System.out.println("Resume not exists");
         }
         return null;
     }
 
+    public void update(Resume r) {
+        int index = getResumeIndex(r.getUuid());
+        if (index != -1) {
+            storage[index] = r;
+        } else {
+            System.out.println("Resume not exists");
+        }
+    }
+
     public void delete(String uuid) {
-        for (int i = 0; i < resumesNumber; i++) {
-            if (storage[i].getUuid().equals(uuid)) {
-                storage[i] = storage[resumesNumber - 1];
-                storage[resumesNumber - 1] = null;
-                resumesNumber--;
-                break;
-            }
+        int index = getResumeIndex(uuid);
+        if (index != -1) {
+            storage[index] = storage[resumesNumber - 1];
+            storage[resumesNumber - 1] = null;
+            resumesNumber--;
+        } else {
+            System.out.println("Resume not exists");
         }
     }
 
@@ -49,5 +67,14 @@ public class ArrayStorage {
 
     public int size() {
         return resumesNumber;
+    }
+
+    private int getResumeIndex(String uuid) {
+        for (int i = 0; i < resumesNumber; i++) {
+            if (storage[i].getUuid().equals(uuid)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
