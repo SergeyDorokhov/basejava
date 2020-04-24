@@ -7,19 +7,21 @@ import java.util.Arrays;
 /**
  * Array based storage for Resumes
  */
-public class ArrayStorage {
+public class ArrayStorage implements Storage {
     private static final int STORAGE_LIMIT = 10_000;
     private final Resume[] storage = new Resume[STORAGE_LIMIT];
     private int resumesNumber;
 
+    @Override
     public void clear() {
         Arrays.fill(storage, 0, resumesNumber, null);
         resumesNumber = 0;
     }
 
+    @Override
     public void save(Resume resume) {
         if (resumesNumber < STORAGE_LIMIT) {
-            if (getResumeIndex(resume.getUuid()) == -1) {
+            if (getIndex(resume.getUuid()) == -1) {
                 storage[resumesNumber++] = resume;
             } else {
                 System.out.println("Resume " + resume.getUuid() + " exists");
@@ -29,8 +31,9 @@ public class ArrayStorage {
         }
     }
 
+    @Override
     public Resume get(String uuid) {
-        int index = getResumeIndex(uuid);
+        int index = getIndex(uuid);
         if (index != -1) {
             return storage[index];
         }
@@ -38,8 +41,9 @@ public class ArrayStorage {
         return null;
     }
 
+    @Override
     public void update(Resume resume) {
-        int index = getResumeIndex(resume.getUuid());
+        int index = getIndex(resume.getUuid());
         if (index != -1) {
             storage[index] = resume;
         } else {
@@ -47,8 +51,9 @@ public class ArrayStorage {
         }
     }
 
+    @Override
     public void delete(String uuid) {
-        int index = getResumeIndex(uuid);
+        int index = getIndex(uuid);
         if (index != -1) {
             storage[index] = storage[resumesNumber - 1];
             storage[resumesNumber - 1] = null;
@@ -61,15 +66,17 @@ public class ArrayStorage {
     /**
      * @return array, contains only Resumes in storage (without null)
      */
+    @Override
     public Resume[] getAll() {
         return Arrays.copyOf(storage, resumesNumber);
     }
 
+    @Override
     public int size() {
         return resumesNumber;
     }
 
-    private int getResumeIndex(String uuid) {
+    private int getIndex(String uuid) {
         for (int i = 0; i < resumesNumber; i++) {
             if (storage[i].getUuid().equals(uuid)) {
                 return i;
