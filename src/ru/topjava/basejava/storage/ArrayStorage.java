@@ -8,21 +8,6 @@ import ru.topjava.basejava.model.Resume;
 public class ArrayStorage extends AbstractArrayStorage {
 
     @Override
-    public void save(Resume resume) {
-        if (resumesNumber < STORAGE_LIMIT) {
-            int index = getIndex(resume.getUuid());
-            if (index < 0) {
-                storage[resumesNumber] = resume;
-                resumesNumber++;
-            } else {
-                System.out.println("Resume " + resume.getUuid() + " exists");
-            }
-        } else {
-            System.out.println("Storage is full");
-        }
-    }
-
-    @Override
     protected int getIndex(String uuid) {
         for (int i = 0; i < resumesNumber; i++) {
             if (storage[i].getUuid().equals(uuid)) {
@@ -30,5 +15,18 @@ public class ArrayStorage extends AbstractArrayStorage {
             }
         }
         return -1;
+    }
+
+    @Override
+    protected void insertResume(Resume resume, int index) {
+        storage[resumesNumber] = resume;
+        resumesNumber++;
+    }
+
+    @Override
+    protected void deleteResume(int index) {
+        storage[index] = storage[resumesNumber - 1];
+        storage[resumesNumber - 1] = null;
+        resumesNumber--;
     }
 }
