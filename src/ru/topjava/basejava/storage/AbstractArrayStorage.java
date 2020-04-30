@@ -1,5 +1,8 @@
 package ru.topjava.basejava.storage;
 
+import ru.topjava.basejava.Exception.ExistStorageException;
+import ru.topjava.basejava.Exception.NotExistStorageException;
+import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.Resume;
 
 import java.util.Arrays;
@@ -23,10 +26,10 @@ public abstract class AbstractArrayStorage implements Storage {
                 insertResume(resume, index);
                 resumesNumber++;
             } else {
-                System.out.println("Resume " + resume.getUuid() + " exists");
+                throw new ExistStorageException(resume.getUuid());
             }
         } else {
-            System.out.println("Storage is full");
+            throw new StorageException("Storage is full, ",resume.getUuid());
         }
     }
 
@@ -36,8 +39,7 @@ public abstract class AbstractArrayStorage implements Storage {
         if (index != -1) {
             return storage[index];
         }
-        System.out.println("Resume " + uuid + " not exists");
-        return null;
+        throw new NotExistStorageException(uuid);
     }
 
     @Override
@@ -46,7 +48,7 @@ public abstract class AbstractArrayStorage implements Storage {
         if (index >= 0) {
             storage[index] = resume;
         } else {
-            System.out.println("Resume " + resume.getUuid() + " not exists");
+            throw new NotExistStorageException(resume.getUuid());
         }
     }
 
@@ -58,7 +60,7 @@ public abstract class AbstractArrayStorage implements Storage {
             storage[resumesNumber - 1] = null;
             resumesNumber--;
         } else {
-            System.out.println("Resume " + uuid + " not exists");
+            throw new NotExistStorageException(uuid);
         }
     }
 
