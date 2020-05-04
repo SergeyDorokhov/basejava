@@ -36,7 +36,7 @@ public abstract class AbstractArrayStorage implements Storage {
     @Override
     public Resume get(String uuid) {
         int index = getIndex(uuid);
-        if (index != -1) {
+        if (index >= 0) {
             return storage[index];
         }
         throw new NotExistStorageException(uuid);
