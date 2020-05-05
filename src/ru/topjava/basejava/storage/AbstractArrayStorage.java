@@ -1,5 +1,6 @@
 package ru.topjava.basejava.storage;
 
+import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.Resume;
 
 import java.util.Arrays;
@@ -10,59 +11,55 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     protected int resumesNumber;
 
     @Override
-    protected void clearStorage() {
+    public void clear() {
         Arrays.fill(storage, 0, resumesNumber, null);
         resumesNumber = 0;
     }
 
     @Override
-    protected boolean checkCapacity() {
-        return resumesNumber < STORAGE_LIMIT;
+    protected boolean isExist(String uuid) {
+        if (resumesNumber < STORAGE_LIMIT) {
+            return getIndex(uuid) >= 0;
+        }
+        throw new StorageException("Storage is full, ", uuid);
     }
 
     @Override
-    protected boolean checkExistResume(String uuid) {
-        return getIndex(uuid) >= 0;
-    }
-
-    @Override
-    protected void addResumeStorage(Resume resume) {
+    protected void addToStorage(Resume resume) {
         int index = getIndex(resume.getUuid());
-        insertResumeToArray(resume, index);
+        insertToArray(resume, index);
         resumesNumber++;
     }
 
     @Override
-    protected Resume getResume(String uuid) {
+    protected Resume getFromStorage(String uuid) {
         return storage[getIndex(uuid)];
     }
 
     @Override
-    protected void updateResume(Resume resume) {
+    protected void updateStorage(Resume resume) {
         int index = getIndex(resume.getUuid());
         storage[index] = resume;
     }
 
     @Override
-    protected void deleteResume(String uuid) {
-        deleteResumeFromArray(getIndex(uuid));
+    protected void deleteFromStorage(String uuid) {
+        deleteFromArray(getIndex(uuid));
         storage[resumesNumber - 1] = null;
         resumesNumber--;
     }
 
     @Override
-    protected Resume[] getAllResumes() {
+    public Resume[] getAll() {
         return Arrays.copyOf(storage, resumesNumber);
     }
 
     @Override
-    protected int countSize() {
+    public int size() {
         return resumesNumber;
     }
 
-    protected abstract int getIndex(String uuid);
+    protected abstract void insertToArray(Resume resume, int index);
 
-    protected abstract void insertResumeToArray(Resume resume, int index);
-
-    protected abstract void deleteResumeFromArray(int index);
+    protected abstract void deleteFromArray(int index);
 }

@@ -10,9 +10,9 @@ public class ArrayStorageTest extends AbstractArrayStorageTest {
     }
 
     @Override
-    protected void checkOrderResumesTest(Storage storage, Resume RESUME_1, Resume RESUME_2, Resume RESUME_3) {
-        assertEquals(RESUME_2, storage.getAll()[0]);
-        assertEquals(RESUME_1, storage.getAll()[1]);
-        assertEquals(RESUME_3, storage.getAll()[2]);
+    protected void checkOrderResumesTest(Storage storage, Resume[] resumes) {
+        assertEquals(resumes[0], storage.getAll()[1]);
+        assertEquals(resumes[1], storage.getAll()[0]);
+        assertEquals(resumes[2], storage.getAll()[2]);
     }
 }

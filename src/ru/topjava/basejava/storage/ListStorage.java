@@ -3,53 +3,53 @@ package ru.topjava.basejava.storage;
 import ru.topjava.basejava.model.Resume;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ListStorage extends AbstractStorage {
-    private final ArrayList<Resume> storage = new ArrayList<>();
+    private final List<Resume> storage = new ArrayList<>();
 
     @Override
-    public void clearStorage() {
+    public void clear() {
         storage.clear();
     }
 
     @Override
-    protected boolean checkCapacity() {
-        return true;
-    }
-
-    @Override
-    protected boolean checkExistResume(String uuid) {
+    protected boolean isExist(String uuid) {
         return storage.contains(new Resume(uuid));
     }
 
     @Override
-    protected void addResumeStorage(Resume resume) {
+    protected void addToStorage(Resume resume) {
         storage.add(resume);
     }
 
     @Override
-    protected Resume getResume(String uuid) {
-        return storage.get(storage.indexOf(new Resume(uuid)));
+    protected Resume getFromStorage(String uuid) {
+        return storage.get(getIndex(uuid));
     }
 
     @Override
-    protected void updateResume(Resume resume) {
-        storage.remove(resume);
-        storage.add(resume);
+    protected void updateStorage(Resume resume) {
+        storage.set(getIndex(resume.getUuid()), resume);
     }
 
     @Override
-    protected void deleteResume(String uuid) {
+    protected void deleteFromStorage(String uuid) {
         storage.remove(new Resume(uuid));
     }
 
     @Override
-    protected Resume[] getAllResumes() {
+    public Resume[] getAll() {
         return storage.toArray(new Resume[0]);
     }
 
     @Override
-    protected int countSize() {
+    public int size() {
         return storage.size();
+    }
+
+    @Override
+    protected int getIndex(String uuid) {
+        return storage.indexOf(new Resume(uuid));
     }
 }

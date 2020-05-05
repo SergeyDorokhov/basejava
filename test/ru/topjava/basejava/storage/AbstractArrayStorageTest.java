@@ -85,8 +85,9 @@ public abstract class AbstractArrayStorageTest {
 
     @Test
     public void getAllTest() {
+        Resume[] resumes = {RESUME_1, RESUME_2, RESUME_3};
         assertEquals(STORAGE_REAL_SIZE, storage.getAll().length);
-        checkOrderResumesTest(storage, RESUME_1, RESUME_2, RESUME_3);
+        checkOrderResumesTest(storage, resumes);
     }
 
     @Test
@@ -107,6 +108,5 @@ public abstract class AbstractArrayStorageTest {
         storage.save(new Resume());
     }
 
-    protected abstract void checkOrderResumesTest(Storage storage,
-                                                  Resume RESUME_1, Resume RESUME_2, Resume RESUME_3);
+    protected abstract void checkOrderResumesTest(Storage storage, Resume[] resumes);
 }
