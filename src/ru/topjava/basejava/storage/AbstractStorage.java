@@ -8,25 +8,28 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void save(Resume resume) {
-        if (isExist(resume.getUuid())) {
+        int index = getIndex(resume.getUuid());
+        if (index >= 0) {
             throw new ExistStorageException(resume.getUuid());
         } else {
-            addToStorage(resume);
+            addToStorage(resume, index);
         }
     }
 
     @Override
     public Resume get(String uuid) {
-        if (isExist(uuid)) {
-            return getFromStorage(uuid);
+        int index = getIndex(uuid);
+        if (index >= 0) {
+            return getFromStorage(uuid, index);
         }
         throw new NotExistStorageException(uuid);
     }
 
     @Override
     public void update(Resume resume) {
-        if (isExist(resume.getUuid())) {
-            updateStorage(resume);
+        int index = getIndex(resume.getUuid());
+        if (index >= 0) {
+            updateStorage(resume, index);
         } else {
             throw new NotExistStorageException(resume.getUuid());
         }
@@ -34,22 +37,21 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void delete(String uuid) {
-        if (isExist(uuid)) {
-            deleteFromStorage(uuid);
+        int index = getIndex(uuid);
+        if (index >= 0) {
+            deleteFromStorage(uuid, index);
         } else {
             throw new NotExistStorageException(uuid);
         }
     }
 
-    protected abstract boolean isExist(String uuid);
+    protected abstract void addToStorage(Resume resume, int index);
 
-    protected abstract void addToStorage(Resume resume);
+    protected abstract Resume getFromStorage(String uuid, int index);
 
-    protected abstract Resume getFromStorage(String uuid);
+    protected abstract void updateStorage(Resume resume, int index);
 
-    protected abstract void updateStorage(Resume resume);
-
-    protected abstract void deleteFromStorage(String uuid);
+    protected abstract void deleteFromStorage(String uuid, int index);
 
     protected abstract int getIndex(String uuid);
 }
