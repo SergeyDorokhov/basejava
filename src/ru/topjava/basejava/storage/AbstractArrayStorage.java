@@ -17,27 +17,27 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected void addToStorage(Resume resume, int index) {
+    protected void addToStorage(Resume resume, Object id) {
         if (resumesNumber == STORAGE_LIMIT) {
             throw new StorageException("Storage is full, ", resume.getUuid());
         }
-        insertToArray(resume, index);
+        insertToArray(resume, (Integer) id);
         resumesNumber++;
     }
 
     @Override
-    protected Resume getFromStorage(String uuid, int index) {
-        return storage[index];
+    protected Resume getFromStorage(Object id) {
+        return storage[(Integer) id];
     }
 
     @Override
-    protected void updateStorage(Resume resume, int index) {
-        storage[index] = resume;
+    protected void updateStorage(Resume resume, Object id) {
+        storage[(Integer) id] = resume;
     }
 
     @Override
-    protected void deleteFromStorage(String uuid, int index) {
-        deleteFromArray(index);
+    protected void deleteFromStorage(Object id) {
+        deleteFromArray((Integer) id);
         storage[resumesNumber - 1] = null;
         resumesNumber--;
     }

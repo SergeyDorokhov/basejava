@@ -8,50 +8,54 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void save(Resume resume) {
-        int index = getIndex(resume.getUuid());
-        if (index >= 0) {
-            throw new ExistStorageException(resume.getUuid());
-        } else {
-            addToStorage(resume, index);
-        }
+        Object id = getID(resume.getUuid());
+        isExist(resume.getUuid(), id);
+        addToStorage(resume, id);
     }
+
 
     @Override
     public Resume get(String uuid) {
-        int index = getIndex(uuid);
-        if (index >= 0) {
-            return getFromStorage(uuid, index);
-        }
-        throw new NotExistStorageException(uuid);
+        Object id = getID(uuid);
+        isNotExist(uuid, id);
+        return getFromStorage(id);
     }
+
 
     @Override
     public void update(Resume resume) {
-        int index = getIndex(resume.getUuid());
-        if (index >= 0) {
-            updateStorage(resume, index);
-        } else {
-            throw new NotExistStorageException(resume.getUuid());
-        }
+        Object id = getID(resume.getUuid());
+        isNotExist(resume.getUuid(), id);
+        updateStorage(resume, id);
+
     }
 
     @Override
     public void delete(String uuid) {
-        int index = getIndex(uuid);
-        if (index >= 0) {
-            deleteFromStorage(uuid, index);
-        } else {
-            throw new NotExistStorageException(uuid);
+        Object id = getID(uuid);
+        isNotExist(uuid, id);
+        deleteFromStorage(id);
+    }
+
+    protected abstract void addToStorage(Resume resume, Object id);
+
+    protected abstract Resume getFromStorage(Object id);
+
+    protected abstract void updateStorage(Resume resume, Object id);
+
+    protected abstract void deleteFromStorage(Object id);
+
+    protected abstract Object getID(String uuid);
+
+    protected void isExist(String uuid, Object id) {
+        if ((Integer) id >= 0) {
+            throw new ExistStorageException(uuid);
         }
     }
 
-    protected abstract void addToStorage(Resume resume, int index);
-
-    protected abstract Resume getFromStorage(String uuid, int index);
-
-    protected abstract void updateStorage(Resume resume, int index);
-
-    protected abstract void deleteFromStorage(String uuid, int index);
-
-    protected abstract int getIndex(String uuid);
+    private void isNotExist(String uuid, Object id) {
+        if ((Integer) id < 0) {
+            throw new NotExistStorageException(uuid);
+        }
+    }
 }
