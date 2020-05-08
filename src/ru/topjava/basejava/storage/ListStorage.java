@@ -54,7 +54,7 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected boolean isThereResume(Object pointer) {
+    protected boolean isExist(Object pointer) {
         return (Integer) pointer >= 0;
     }
 }

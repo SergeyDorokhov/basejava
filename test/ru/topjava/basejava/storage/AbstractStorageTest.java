@@ -9,7 +9,7 @@ import ru.topjava.basejava.model.Resume;
 import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractStorageTest {
-    private final Storage storage;
+    protected final Storage storage;
     private final Resume RESUME_1 = new Resume("uuid1");
     private final Resume RESUME_2 = new Resume("uuid2");
     private final Resume RESUME_3 = new Resume("uuid3");

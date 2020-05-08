@@ -28,7 +28,7 @@ public abstract class AbstractStorage implements Storage {
 
     protected Object isNotExist(String uuid) {
         Object pointer = getPointer(uuid);
-        if (isThereResume(pointer)) {
+        if (isExist(pointer)) {
             throw new ExistStorageException(uuid);
         }
         return pointer;
@@ -36,7 +36,7 @@ public abstract class AbstractStorage implements Storage {
 
     private Object isExist(String uuid) {
         Object pointer = getPointer(uuid);
-        if (!isThereResume(pointer)) {
+        if (!isExist(pointer)) {
             throw new NotExistStorageException(uuid);
         }
         return pointer;
@@ -44,7 +44,7 @@ public abstract class AbstractStorage implements Storage {
 
     protected abstract Object getPointer(String uuid);
 
-    protected abstract boolean isThereResume(Object pointer);
+    protected abstract boolean isExist(Object pointer);
 
     protected abstract void addToStorage(Resume resume, Object pointer);
 

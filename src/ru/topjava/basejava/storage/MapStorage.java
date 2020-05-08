@@ -49,7 +49,7 @@ public class MapStorage extends AbstractStorage {
     }
 
     @Override
-    protected boolean isThereResume(Object pointer) {
+    protected boolean isExist(Object pointer) {
         return pointer != null;
     }
 }
