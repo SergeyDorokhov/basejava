@@ -17,27 +17,27 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected void addToStorage(Resume resume, Object id) {
+    protected void addToStorage(Resume resume, Object pointer) {
         if (resumesNumber == STORAGE_LIMIT) {
             throw new StorageException("Storage is full, ", resume.getUuid());
         }
-        insertToArray(resume, (Integer) id);
+        insertToArray(resume, (Integer) pointer);
         resumesNumber++;
     }
 
     @Override
-    protected Resume getFromStorage(Object id) {
-        return storage[(Integer) id];
+    protected Resume getFromStorage(Object pointer) {
+        return storage[(Integer) pointer];
     }
 
     @Override
-    protected void updateStorage(Resume resume, Object id) {
-        storage[(Integer) id] = resume;
+    protected void updateStorage(Resume resume, Object pointer) {
+        storage[(Integer) pointer] = resume;
     }
 
     @Override
-    protected void deleteFromStorage(Object id) {
-        deleteFromArray((Integer) id);
+    protected void deleteFromStorage(Object pointer) {
+        deleteFromArray((Integer) pointer);
         storage[resumesNumber - 1] = null;
         resumesNumber--;
     }
@@ -50,6 +50,11 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     @Override
     public int size() {
         return resumesNumber;
+    }
+
+    @Override
+    protected boolean isThereResume(Object pointer) {
+        return (Integer) pointer >= 0;
     }
 
     protected abstract void insertToArray(Resume resume, int index);

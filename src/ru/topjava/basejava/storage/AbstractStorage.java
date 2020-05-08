@@ -8,54 +8,49 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void save(Resume resume) {
-        Object id = getID(resume.getUuid());
-        isExist(resume.getUuid(), id);
-        addToStorage(resume, id);
+        addToStorage(resume, isNotExist(resume.getUuid()));
     }
-
 
     @Override
     public Resume get(String uuid) {
-        Object id = getID(uuid);
-        isNotExist(uuid, id);
-        return getFromStorage(id);
+        return getFromStorage(isExist(uuid));
     }
-
 
     @Override
     public void update(Resume resume) {
-        Object id = getID(resume.getUuid());
-        isNotExist(resume.getUuid(), id);
-        updateStorage(resume, id);
-
+        updateStorage(resume, isExist(resume.getUuid()));
     }
 
     @Override
     public void delete(String uuid) {
-        Object id = getID(uuid);
-        isNotExist(uuid, id);
-        deleteFromStorage(id);
+        deleteFromStorage(isExist(uuid));
     }
 
-    protected abstract void addToStorage(Resume resume, Object id);
-
-    protected abstract Resume getFromStorage(Object id);
-
-    protected abstract void updateStorage(Resume resume, Object id);
-
-    protected abstract void deleteFromStorage(Object id);
-
-    protected abstract Object getID(String uuid);
-
-    protected void isExist(String uuid, Object id) {
-        if ((Integer) id >= 0) {
+    protected Object isNotExist(String uuid) {
+        Object pointer = getPointer(uuid);
+        if (isThereResume(pointer)) {
             throw new ExistStorageException(uuid);
         }
+        return pointer;
     }
 
-    private void isNotExist(String uuid, Object id) {
-        if ((Integer) id < 0) {
+    private Object isExist(String uuid) {
+        Object pointer = getPointer(uuid);
+        if (!isThereResume(pointer)) {
             throw new NotExistStorageException(uuid);
         }
+        return pointer;
     }
+
+    protected abstract Object getPointer(String uuid);
+
+    protected abstract boolean isThereResume(Object pointer);
+
+    protected abstract void addToStorage(Resume resume, Object pointer);
+
+    protected abstract Resume getFromStorage(Object pointer);
+
+    protected abstract void updateStorage(Resume resume, Object pointer);
+
+    protected abstract void deleteFromStorage(Object pointer);
 }

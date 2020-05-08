@@ -8,7 +8,7 @@ import ru.topjava.basejava.model.Resume;
 public class ArrayStorage extends AbstractArrayStorage {
 
     @Override
-    protected Object getID(String uuid) {
+    protected Object getPointer(String uuid) {
         for (int i = 0; i < resumesNumber; i++) {
             if (storage[i].getUuid().equals(uuid)) {
                 return i;
