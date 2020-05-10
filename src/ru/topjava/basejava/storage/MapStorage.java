@@ -2,7 +2,9 @@ package ru.topjava.basejava.storage;
 
 import ru.topjava.basejava.model.Resume;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapStorage extends AbstractStorage {
@@ -34,11 +36,6 @@ public class MapStorage extends AbstractStorage {
     }
 
     @Override
-    public Resume[] getAll() {
-        return storage.values().toArray(new Resume[0]);
-    }
-
-    @Override
     public int size() {
         return storage.size();
     }
@@ -51,5 +48,10 @@ public class MapStorage extends AbstractStorage {
     @Override
     protected boolean isExist(Object pointer) {
         return pointer != null;
+    }
+
+    @Override
+    public List<Resume> getList() {
+        return Arrays.asList(storage.values().toArray(new Resume[0]));
     }
 }

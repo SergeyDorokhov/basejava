@@ -4,6 +4,9 @@ import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
 
+import java.util.Comparator;
+import java.util.List;
+
 public abstract class AbstractStorage implements Storage {
 
     @Override
@@ -26,6 +29,13 @@ public abstract class AbstractStorage implements Storage {
         deleteFromStorage(isExist(uuid));
     }
 
+    @Override
+    public List<Resume> getAllSorted() {
+        List<Resume> list = getList();
+        list.sort(RESUME_COMPARATOR);
+        return list;
+    }
+
     protected Object isNotExist(String uuid) {
         Object pointer = getPointer(uuid);
         if (isExist(pointer)) {
@@ -42,6 +52,9 @@ public abstract class AbstractStorage implements Storage {
         return pointer;
     }
 
+    protected static final Comparator<Resume> RESUME_COMPARATOR =
+            Comparator.comparing(Resume::getFullName).thenComparing(Resume::getUuid);
+
     protected abstract Object getPointer(String uuid);
 
     protected abstract boolean isExist(Object pointer);
@@ -53,4 +66,6 @@ public abstract class AbstractStorage implements Storage {
     protected abstract void updateStorage(Resume resume, Object pointer);
 
     protected abstract void deleteFromStorage(Object pointer);
+
+    protected abstract List<Resume> getList();
 }

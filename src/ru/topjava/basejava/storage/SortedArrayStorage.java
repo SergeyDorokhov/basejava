@@ -3,7 +3,7 @@ package ru.topjava.basejava.storage;
 import ru.topjava.basejava.model.Resume;
 
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.List;
 
 /**
  * SortedArray based storage for Resumes
@@ -12,9 +12,8 @@ public class SortedArrayStorage extends AbstractArrayStorage {
 
     @Override
     protected Object getPointer(String uuid) {
-        Resume searchKey = new Resume(uuid);
-        //return Arrays.binarySearch(storage, 0, resumesNumber, searchKey);
-        return Arrays.binarySearch(storage, 0, resumesNumber, searchKey, RESUME_COMPARATOR);
+        Resume searchKey = new Resume(uuid, "");
+        return Arrays.binarySearch(storage, 0, resumesNumber, searchKey);
     }
 
     @Override
@@ -29,5 +28,8 @@ public class SortedArrayStorage extends AbstractArrayStorage {
         System.arraycopy(storage, index + 1, storage, index, resumesNumber - index - 1);
     }
 
-    private static final Comparator<Resume> RESUME_COMPARATOR = (o1, o2) -> o1.getUuid().compareTo(o2.getUuid());
+    @Override
+    public List<Resume> getList() {
+        return Arrays.asList(Arrays.copyOf(storage, resumesNumber));
+    }
 }

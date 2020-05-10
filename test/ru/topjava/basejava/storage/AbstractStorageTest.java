@@ -10,10 +10,11 @@ import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractStorageTest {
     protected final Storage storage;
-    private final Resume RESUME_1 = new Resume("uuid1");
-    private final Resume RESUME_2 = new Resume("uuid2");
-    private final Resume RESUME_3 = new Resume("uuid3");
-    private final Resume RESUME_4 = new Resume("uuid1");
+    private final Resume RESUME_1 = new Resume("uuid1", "Большов Петр");
+    private final Resume RESUME_2 = new Resume("uuid2", "Альков Иван");
+    private final Resume RESUME_3 = new Resume("uuid3", "Веселов Михаил");
+    private final Resume RESUME_WITH_SAME_UUID = new Resume("uuid1", "Альков Иван");
+    private final Resume RESUME_WITH_SAME_NAME = new Resume("uuid5", "Альков Иван");
     private final int STORAGE_REAL_SIZE = 3;
 
     public AbstractStorageTest(Storage storage) {
@@ -40,7 +41,6 @@ public abstract class AbstractStorageTest {
         storage.save(RESUME_1);
         assertEquals(1, storage.size());
         assertEquals(RESUME_1, storage.get(RESUME_1.getUuid()));
-
     }
 
     @Test(expected = ExistStorageException.class)
@@ -60,13 +60,13 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void updateExistResumeTest() {
-        storage.update(RESUME_4);
-        assertEquals(RESUME_4, storage.get(RESUME_4.getUuid()));
+        storage.update(RESUME_WITH_SAME_UUID);
+        assertEquals(RESUME_WITH_SAME_UUID, storage.get(RESUME_WITH_SAME_UUID.getUuid()));
     }
 
     @Test(expected = NotExistStorageException.class)
     public void updateNotExistResumeTest() {
-        storage.update(new Resume());
+        storage.update(new Resume(""));
     }
 
     @Test(expected = NotExistStorageException.class)
@@ -78,20 +78,26 @@ public abstract class AbstractStorageTest {
 
     @Test(expected = NotExistStorageException.class)
     public void deleteNotExistResumeTest() {
-        storage.delete(new Resume().getUuid());
+        storage.delete(new Resume("").getUuid());
     }
 
     @Test
     public void getAllTest() {
-        Resume[] resumes = {RESUME_1, RESUME_2, RESUME_3};
-        assertEquals(STORAGE_REAL_SIZE, storage.getAll().length);
+        Resume[] resumes = {RESUME_1, RESUME_2, RESUME_3, RESUME_WITH_SAME_NAME};
+        storage.save(RESUME_WITH_SAME_NAME);
+        assertEquals(STORAGE_REAL_SIZE + 1, storage.getAllSorted().size());
         checkOrderResumesTest(storage, resumes);
     }
 
     @Test
     public void sizeTest() {
-        assertEquals(storage.getAll().length, storage.size());
+        assertEquals(storage.getAllSorted().size(), storage.size());
     }
 
-    protected abstract void checkOrderResumesTest(Storage storage, Resume[] resumes);
+    private void checkOrderResumesTest(Storage storage, Resume[] resumes) {
+        assertEquals(resumes[1], storage.getAllSorted().get(0));
+        assertEquals(resumes[3], storage.getAllSorted().get(1));
+        assertEquals(resumes[0], storage.getAllSorted().get(2));
+        assertEquals(resumes[2], storage.getAllSorted().get(3));
+    }
 }
