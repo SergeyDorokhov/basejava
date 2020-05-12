@@ -11,22 +11,22 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void save(Resume resume) {
-        addToStorage(resume, isNotExist(resume.getUuid()));
+        addToStorage(resume, checkNotExist(resume.getUuid()));
     }
 
     @Override
     public Resume get(String uuid) {
-        return getFromStorage(isExist(uuid));
+        return getFromStorage(checkExist(uuid));
     }
 
     @Override
     public void update(Resume resume) {
-        updateStorage(resume, isExist(resume.getUuid()));
+        updateStorage(resume, checkExist(resume.getUuid()));
     }
 
     @Override
     public void delete(String uuid) {
-        deleteFromStorage(isExist(uuid));
+        deleteFromStorage(checkExist(uuid));
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class AbstractStorage implements Storage {
         return list;
     }
 
-    protected Object isNotExist(String uuid) {
+    private Object checkNotExist(String uuid) {
         Object pointer = getPointer(uuid);
         if (isExist(pointer)) {
             throw new ExistStorageException(uuid);
@@ -44,7 +44,7 @@ public abstract class AbstractStorage implements Storage {
         return pointer;
     }
 
-    private Object isExist(String uuid) {
+    private Object checkExist(String uuid) {
         Object pointer = getPointer(uuid);
         if (!isExist(pointer)) {
             throw new NotExistStorageException(uuid);

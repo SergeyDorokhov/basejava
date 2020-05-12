@@ -4,6 +4,7 @@ import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.Resume;
 
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class AbstractArrayStorage extends AbstractStorage {
     protected static final int STORAGE_LIMIT = 10_000;
@@ -50,6 +51,11 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     @Override
     protected boolean isExist(Object pointer) {
         return (Integer) pointer >= 0;
+    }
+
+    @Override
+    public List<Resume> getList() {
+        return Arrays.asList(Arrays.copyOf(storage, resumesNumber));
     }
 
     protected abstract void insertToArray(Resume resume, int index);

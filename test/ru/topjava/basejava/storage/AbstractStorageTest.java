@@ -6,6 +6,10 @@ import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractStorageTest {
@@ -15,7 +19,6 @@ public abstract class AbstractStorageTest {
     private final Resume RESUME_3 = new Resume("uuid3", "Веселов Михаил");
     private final Resume RESUME_WITH_SAME_UUID = new Resume("uuid1", "Альков Иван");
     private final Resume RESUME_WITH_SAME_NAME = new Resume("uuid5", "Альков Иван");
-    private final int STORAGE_REAL_SIZE = 3;
 
     public AbstractStorageTest(Storage storage) {
         this.storage = storage;
@@ -72,7 +75,7 @@ public abstract class AbstractStorageTest {
     @Test(expected = NotExistStorageException.class)
     public void deleteExistResumeTest() {
         storage.delete(RESUME_2.getUuid());
-        assertEquals(STORAGE_REAL_SIZE - 1, storage.size());
+        assertEquals(2, storage.size());
         storage.get(RESUME_2.getUuid());
     }
 
@@ -83,21 +86,9 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void getAllTest() {
-        Resume[] resumes = {RESUME_1, RESUME_2, RESUME_3, RESUME_WITH_SAME_NAME};
+        List<Resume> resumes = Arrays.asList(RESUME_1, RESUME_2, RESUME_3, RESUME_WITH_SAME_NAME);
+        resumes.sort(Comparator.comparing(Resume::getFullName).thenComparing(Resume::getUuid));
         storage.save(RESUME_WITH_SAME_NAME);
-        assertEquals(STORAGE_REAL_SIZE + 1, storage.getAllSorted().size());
-        checkOrderResumesTest(storage, resumes);
-    }
-
-    @Test
-    public void sizeTest() {
-        assertEquals(storage.getAllSorted().size(), storage.size());
-    }
-
-    private void checkOrderResumesTest(Storage storage, Resume[] resumes) {
-        assertEquals(resumes[1], storage.getAllSorted().get(0));
-        assertEquals(resumes[3], storage.getAllSorted().get(1));
-        assertEquals(resumes[0], storage.getAllSorted().get(2));
-        assertEquals(resumes[2], storage.getAllSorted().get(3));
+        assertEquals(resumes, storage.getAllSorted());
     }
 }
