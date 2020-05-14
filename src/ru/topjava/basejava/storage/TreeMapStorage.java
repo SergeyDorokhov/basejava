@@ -7,27 +7,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class TreeMapStorage extends AbstractStorage {
+public class TreeMapStorage extends AbstractStorage<Resume> {
     private final Map<String, Resume> storage = new TreeMap<>();
 
     @Override
-    protected void addToStorage(Resume resume, Object pointer) {
+    protected void addToStorage(Resume resume, Resume pointer) {
         storage.put(resume.getUuid(), resume);
     }
 
     @Override
-    protected Resume getFromStorage(Object pointer) {
-        return storage.get(((Resume) pointer).getUuid());
+    protected Resume getFromStorage(Resume pointer) {
+        return storage.get(pointer.getUuid());
     }
 
     @Override
-    protected void updateStorage(Resume resume, Object pointer) {
-        storage.replace(((Resume) pointer).getUuid(), resume);
+    protected void updateStorage(Resume resume, Resume pointer) {
+        storage.replace(pointer.getUuid(), resume);
     }
 
     @Override
-    protected void deleteFromStorage(Object pointer) {
-        storage.remove(((Resume) pointer).getUuid());
+    protected void deleteFromStorage(Resume pointer) {
+        storage.remove(pointer.getUuid());
     }
 
     @Override
@@ -41,12 +41,12 @@ public class TreeMapStorage extends AbstractStorage {
     }
 
     @Override
-    protected Object getPointer(String uuid) {
+    protected Resume getPointer(String uuid) {
         return storage.get(uuid);
     }
 
     @Override
-    protected boolean isExist(Object pointer) {
+    protected boolean isExist(Resume pointer) {
         return pointer != null;
     }
 

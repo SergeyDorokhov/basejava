@@ -6,7 +6,7 @@ import ru.topjava.basejava.model.Resume;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class AbstractArrayStorage extends AbstractStorage {
+public abstract class AbstractArrayStorage extends AbstractStorage<Integer> {
     protected static final int STORAGE_LIMIT = 10_000;
     protected final Resume[] storage = new Resume[STORAGE_LIMIT];
     protected int resumesNumber;
@@ -18,27 +18,27 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected void addToStorage(Resume resume, Object pointer) {
+    protected void addToStorage(Resume resume, Integer pointer) {
         if (resumesNumber == STORAGE_LIMIT) {
             throw new StorageException("Storage is full, ", resume.getUuid());
         }
-        insertToArray(resume, (Integer) pointer);
+        insertToArray(resume, pointer);
         resumesNumber++;
     }
 
     @Override
-    protected Resume getFromStorage(Object pointer) {
-        return storage[(Integer) pointer];
+    protected Resume getFromStorage(Integer pointer) {
+        return storage[pointer];
     }
 
     @Override
-    protected void updateStorage(Resume resume, Object pointer) {
-        storage[(Integer) pointer] = resume;
+    protected void updateStorage(Resume resume, Integer pointer) {
+        storage[pointer] = resume;
     }
 
     @Override
-    protected void deleteFromStorage(Object pointer) {
-        deleteFromArray((Integer) pointer);
+    protected void deleteFromStorage(Integer pointer) {
+        deleteFromArray(pointer);
         storage[resumesNumber - 1] = null;
         resumesNumber--;
     }
@@ -49,8 +49,8 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected boolean isExist(Object pointer) {
-        return (Integer) pointer >= 0;
+    protected boolean isExist(Integer pointer) {
+        return pointer >= 0;
     }
 
     @Override

@@ -5,7 +5,7 @@ import ru.topjava.basejava.model.Resume;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListStorage extends AbstractStorage {
+public class ListStorage extends AbstractStorage<Integer> {
     private final List<Resume> storage = new ArrayList<>();
 
     @Override
@@ -14,23 +14,23 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected void addToStorage(Resume resume, Object pointer) {
+    protected void addToStorage(Resume resume, Integer pointer) {
         storage.add(resume);
     }
 
     @Override
-    protected Resume getFromStorage(Object pointer) {
-        return storage.get((Integer) pointer);
+    protected Resume getFromStorage(Integer pointer) {
+        return storage.get(pointer);
     }
 
     @Override
-    protected void updateStorage(Resume resume, Object pointer) {
-        storage.set((Integer) pointer, resume);
+    protected void updateStorage(Resume resume, Integer pointer) {
+        storage.set(pointer, resume);
     }
 
     @Override
-    protected void deleteFromStorage(Object pointer) {
-        storage.remove(((Integer) pointer).intValue());
+    protected void deleteFromStorage(Integer pointer) {
+        storage.remove((pointer).intValue());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected Object getPointer(String uuid) {
+    protected Integer getPointer(String uuid) {
         for (int i = 0; i < storage.size(); i++) {
             if (storage.get(i).getUuid().equals(uuid)) {
                 return i;
@@ -49,8 +49,8 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected boolean isExist(Object pointer) {
-        return (Integer) pointer >= 0;
+    protected boolean isExist(Integer pointer) {
+        return pointer >= 0;
     }
 
     @Override

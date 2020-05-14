@@ -7,7 +7,7 @@ import ru.topjava.basejava.model.Resume;
 import java.util.Comparator;
 import java.util.List;
 
-public abstract class AbstractStorage implements Storage {
+public abstract class AbstractStorage<P> implements Storage {
 
     @Override
     public void save(Resume resume) {
@@ -36,16 +36,16 @@ public abstract class AbstractStorage implements Storage {
         return list;
     }
 
-    private Object checkNotExist(String uuid) {
-        Object pointer = getPointer(uuid);
+    private P checkNotExist(String uuid) {
+        P pointer = getPointer(uuid);
         if (isExist(pointer)) {
             throw new ExistStorageException(uuid);
         }
         return pointer;
     }
 
-    private Object checkExist(String uuid) {
-        Object pointer = getPointer(uuid);
+    private P checkExist(String uuid) {
+        P pointer = getPointer(uuid);
         if (!isExist(pointer)) {
             throw new NotExistStorageException(uuid);
         }
@@ -55,17 +55,17 @@ public abstract class AbstractStorage implements Storage {
     protected static final Comparator<Resume> RESUME_COMPARATOR =
             Comparator.comparing(Resume::getFullName).thenComparing(Resume::getUuid);
 
-    protected abstract Object getPointer(String uuid);
+    protected abstract P getPointer(String uuid);
 
-    protected abstract boolean isExist(Object pointer);
+    protected abstract boolean isExist(P pointer);
 
-    protected abstract void addToStorage(Resume resume, Object pointer);
+    protected abstract void addToStorage(Resume resume, P pointer);
 
-    protected abstract Resume getFromStorage(Object pointer);
+    protected abstract Resume getFromStorage(P pointer);
 
-    protected abstract void updateStorage(Resume resume, Object pointer);
+    protected abstract void updateStorage(Resume resume, P pointer);
 
-    protected abstract void deleteFromStorage(Object pointer);
+    protected abstract void deleteFromStorage(P pointer);
 
     protected abstract List<Resume> getList();
 }
