@@ -10,7 +10,6 @@ public enum ContactType {
     SITE("Site");
 
     private String title;
-    private String data;
 
     ContactType(String title) {
         this.title = title;
@@ -20,15 +19,4 @@ public enum ContactType {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
 }
