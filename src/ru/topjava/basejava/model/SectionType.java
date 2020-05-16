@@ -9,6 +9,7 @@ public enum SectionType {
     EDUCATION("Образование");
 
     private String title;
+    private String data;
 
     SectionType(String title) {
         this.title = title;
@@ -16,5 +17,13 @@ public enum SectionType {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setContent(String data) {
+        this.data = data;
     }
 }
