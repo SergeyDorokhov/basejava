@@ -1,6 +1,6 @@
 package ru.topjava.basejava.model;
 
-public class TextSection extends Section {
+public class TextSection extends AbstractSection {
     private final String data;
 
     public TextSection(String data) {

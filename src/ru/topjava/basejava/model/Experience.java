@@ -2,17 +2,18 @@ package ru.topjava.basejava.model;
 
 import java.time.LocalDate;
 
-public class Employer {
-    private final String name;
-    private final String site;
+public class Experience {
+    private final String employerName;
+    private final String employerSite;
     private final LocalDate startDate;
     private final LocalDate finishDate;
     private final String position;
     private final String description;
 
-    public Employer(String name, String site, LocalDate startDate, LocalDate finishDate, String position, String description) {
-        this.name = name;
-        this.site = site;
+    public Experience(String employerName, String employerSite, LocalDate startDate,
+                      LocalDate finishDate, String position, String description) {
+        this.employerName = employerName;
+        this.employerSite = employerSite;
         this.startDate = startDate;
         this.finishDate = finishDate;
         this.position = position;
@@ -24,20 +25,20 @@ public class Employer {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
 
-        Employer employer = (Employer) object;
+        Experience experience = (Experience) object;
 
-        if (!name.equals(employer.name)) return false;
-        if (!site.equals(employer.site)) return false;
-        if (!startDate.equals(employer.startDate)) return false;
-        if (!finishDate.equals(employer.finishDate)) return false;
-        if (!position.equals(employer.position)) return false;
-        return description.equals(employer.description);
+        if (!employerName.equals(experience.employerName)) return false;
+        if (!employerSite.equals(experience.employerSite)) return false;
+        if (!startDate.equals(experience.startDate)) return false;
+        if (!finishDate.equals(experience.finishDate)) return false;
+        if (!position.equals(experience.position)) return false;
+        return description.equals(experience.description);
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + site.hashCode();
+        int result = employerName.hashCode();
+        result = 31 * result + employerSite.hashCode();
         result = 31 * result + startDate.hashCode();
         result = 31 * result + finishDate.hashCode();
         result = 31 * result + position.hashCode();
@@ -47,9 +48,9 @@ public class Employer {
 
     @Override
     public String toString() {
-        return "Employer{" +
-                "name='" + name + '\'' +
-                ", site='" + site + '\'' +
+        return "Experience{" +
+                "name='" + employerName + '\'' +
+                ", site='" + employerSite + '\'' +
                 ", startDate=" + startDate +
                 ", finishDate=" + finishDate +
                 ", position='" + position + '\'' +

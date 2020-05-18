@@ -2,7 +2,7 @@ package ru.topjava.basejava.model;
 
 import java.util.List;
 
-public class ListSection extends Section {
+public class ListSection extends AbstractSection {
     private final List<String> data;
 
     public ListSection(List<String> data) {

@@ -1,6 +1,6 @@
 package ru.topjava.basejava.model;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,7 +14,7 @@ public class Resume implements Comparable<Resume> {
     private final String uuid;
     private final String fullName;
     private final Map<ContactType, String> contacts;
-    private final Map<SectionType, Section> sections;
+    private final Map<SectionType, AbstractSection> sections;
 
 
     public Resume(String fullName) {
@@ -26,8 +26,8 @@ public class Resume implements Comparable<Resume> {
         Objects.requireNonNull(fullName, "fullName must not be null");
         this.uuid = uuid;
         this.fullName = fullName;
-        this.contacts = new HashMap<>();
-        this.sections = new HashMap<>();
+        this.contacts = new EnumMap<>(ContactType.class);
+        this.sections = new EnumMap<>(SectionType.class);
     }
 
 
@@ -43,7 +43,7 @@ public class Resume implements Comparable<Resume> {
         return contacts;
     }
 
-    public Map<SectionType, Section> getSections() {
+    public Map<SectionType, AbstractSection> getSections() {
         return sections;
     }
 
@@ -55,13 +55,17 @@ public class Resume implements Comparable<Resume> {
         Resume resume = (Resume) object;
 
         if (!uuid.equals(resume.uuid)) return false;
-        return fullName.equals(resume.fullName);
+        if (!fullName.equals(resume.fullName)) return false;
+        if (!contacts.equals(resume.contacts)) return false;
+        return sections.equals(resume.sections);
     }
 
     @Override
     public int hashCode() {
         int result = uuid.hashCode();
         result = 31 * result + fullName.hashCode();
+        result = 31 * result + contacts.hashCode();
+        result = 31 * result + sections.hashCode();
         return result;
     }
 
