@@ -5,6 +5,7 @@ import org.junit.Test;
 import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
+import ru.topjava.basejava.model.ResumeTestData;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,6 +20,7 @@ public abstract class AbstractStorageTest {
     private final Resume RESUME_3 = new Resume("uuid3", "Веселов Михаил");
     private final Resume RESUME_WITH_SAME_UUID = new Resume("uuid1", "Альков Иван");
     private final Resume RESUME_WITH_SAME_NAME = new Resume("uuid5", "Альков Иван");
+    private final Resume RESUME_KISLIN = ResumeTestData.CreateResume();
 
     public AbstractStorageTest(Storage storage) {
         this.storage = storage;

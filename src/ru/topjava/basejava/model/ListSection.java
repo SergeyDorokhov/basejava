@@ -26,6 +26,10 @@ public class ListSection extends AbstractSection {
 
     @Override
     public String toString() {
-        return data.toString();
+        StringBuilder content = new StringBuilder();
+        for (String text : data) {
+            content.append("\n" + text);
+        }
+        return content.toString();
     }
 }
