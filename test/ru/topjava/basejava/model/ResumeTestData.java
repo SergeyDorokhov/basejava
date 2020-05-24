@@ -3,26 +3,8 @@ package ru.topjava.basejava.model;
 import java.util.Map;
 
 public class ResumeTestData {
-    public static Resume CreateResume() {
-        ResumeData data = new ResumeData();
-        Resume resume = new Resume(data.getFullName());
-        fillContacts(data, resume.getContacts());
-        fillSection(data, resume.getSections());
-        return resume;
-    }
-
-    private static void fillContacts(ResumeData data, Map<ContactType, String> contacts) {
-        contacts.put(ContactType.PHONE, data.getPhone());
-        contacts.put(ContactType.SKYPE, data.getSkype());
-    }
-
-    private static void fillSection(ResumeData data, Map<SectionType, AbstractSection> sections) {
-        sections.put(SectionType.OBJECTIVE, new TextSection(data.getObjective()));
-        sections.put(SectionType.PERSONAL, new TextSection(data.getPersonal()));
-        sections.put(SectionType.ACHIEVEMENT, new ListSection(data.getAchievement()));
-        sections.put(SectionType.QUALIFICATIONS, new ListSection(data.getQualification()));
-        sections.put(SectionType.EXPERIENCE, new ExperienceSection(data.getExperiences()));
-        sections.put(SectionType.EDUCATION, new ExperienceSection(data.getEducation()));
+    public static Resume createResume(String uuid, String fullName) {
+        return new Resume(uuid, fullName);
     }
 
     public static void printContacts(Map<ContactType, String> map) {
@@ -38,7 +20,18 @@ public class ResumeTestData {
     }
 
     public static void main(String[] args) {
-        Resume resume = CreateResume();
+        Resume resume = createResume("uuid6", "Кислин Григорий");
+        {
+            ResumeData data = new ResumeData();
+            resume.fillContacts(ContactType.PHONE, data.getPhone());
+            resume.fillContacts(ContactType.SKYPE, data.getSkype());
+            resume.fillSection(SectionType.OBJECTIVE, new TextSection(data.getObjective()));
+            resume.fillSection(SectionType.PERSONAL, new TextSection(data.getPersonal()));
+            resume.fillSection(SectionType.ACHIEVEMENT, new ListSection(data.getAchievement()));
+            resume.fillSection(SectionType.QUALIFICATIONS, new ListSection(data.getQualification()));
+            resume.fillSection(SectionType.EXPERIENCE, new ExperienceSection(data.getExperiences()));
+            resume.fillSection(SectionType.EDUCATION, new ExperienceSection(data.getEducation()));
+        }
         System.out.println(resume.getFullName());
         printContacts(resume.getContacts());
         printSections(resume.getSections());

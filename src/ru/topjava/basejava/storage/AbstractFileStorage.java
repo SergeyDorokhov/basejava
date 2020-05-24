@@ -56,12 +56,17 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
 
     @Override
     protected void deleteFromStorage(File pointer) {
-        pointer.delete();
+        if (!pointer.delete()) {
+            throw new StorageException("Delete error", pointer.getName());
+        }
     }
 
     @Override
     protected List<Resume> getList() {
         File[] files = storage.listFiles();
+        if (files == null) {
+            throw new StorageException("Storage is invalid", null);
+        }
         Resume[] resumes = new Resume[files.length];
         for (int i = 0; i < resumes.length; i++) {
             resumes[i] = doRead(files[i]);
@@ -71,14 +76,22 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
 
     @Override
     public void clear() {
-        for (File file : storage.listFiles()) {
-            file.delete();
+        File[] files = storage.listFiles();
+        if (files == null) {
+            throw new StorageException("Storage is invalid", null);
+        }
+        for (File file : files) {
+            deleteFromStorage(file);
         }
     }
 
     @Override
     public int size() {
-        return storage.listFiles().length;
+        File[] files = storage.listFiles();
+        if (files == null) {
+            throw new StorageException("Storage is invalid", null);
+        }
+        return files.length;
     }
 
     protected abstract void doWrite(Resume resume, File pointer);

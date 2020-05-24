@@ -4,8 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.NotExistStorageException;
-import ru.topjava.basejava.model.Resume;
-import ru.topjava.basejava.model.ResumeTestData;
+import ru.topjava.basejava.model.*;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -15,12 +14,24 @@ import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractStorageTest {
     protected final Storage storage;
-    private final Resume RESUME_1 = new Resume("uuid1", "Большов Петр");
-    private final Resume RESUME_2 = new Resume("uuid2", "Альков Иван");
-    private final Resume RESUME_3 = new Resume("uuid3", "Веселов Михаил");
-    private final Resume RESUME_WITH_SAME_UUID = new Resume("uuid1", "Альков Иван");
-    private final Resume RESUME_WITH_SAME_NAME = new Resume("uuid5", "Альков Иван");
-    private final Resume RESUME_KISLIN = ResumeTestData.CreateResume();
+    private final Resume RESUME_1 = ResumeTestData.createResume("uuid1", "Большов Петр");
+    private final Resume RESUME_2 = ResumeTestData.createResume("uuid2", "Альков Иван");
+    private final Resume RESUME_3 = ResumeTestData.createResume("uuid3", "Веселов Михаил");
+    private final Resume RESUME_WITH_SAME_UUID = ResumeTestData.createResume("uuid1", "Альков Иван");
+    private final Resume RESUME_WITH_SAME_NAME = ResumeTestData.createResume("uuid5", "Альков Иван");
+    private final Resume RESUME_KISLIN = ResumeTestData.createResume("uuid6", "Кислин Григорий");
+
+    {
+        ResumeData data = new ResumeData();
+        RESUME_KISLIN.fillContacts(ContactType.PHONE, data.getPhone());
+        RESUME_KISLIN.fillContacts(ContactType.SKYPE, data.getSkype());
+        RESUME_KISLIN.fillSection(SectionType.OBJECTIVE, new TextSection(data.getObjective()));
+        RESUME_KISLIN.fillSection(SectionType.PERSONAL, new TextSection(data.getPersonal()));
+        RESUME_KISLIN.fillSection(SectionType.ACHIEVEMENT, new ListSection(data.getAchievement()));
+        RESUME_KISLIN.fillSection(SectionType.QUALIFICATIONS, new ListSection(data.getQualification()));
+        RESUME_KISLIN.fillSection(SectionType.EXPERIENCE, new ExperienceSection(data.getExperiences()));
+        RESUME_KISLIN.fillSection(SectionType.EDUCATION, new ExperienceSection(data.getEducation()));
+    }
 
     public AbstractStorageTest(Storage storage) {
         this.storage = storage;
