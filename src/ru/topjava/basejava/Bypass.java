@@ -1,4 +1,4 @@
-package ru.topjava.basejava.util;
+package ru.topjava.basejava;
 
 import java.io.File;
 import java.io.IOException;
