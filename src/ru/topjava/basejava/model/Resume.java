@@ -45,11 +45,11 @@ public class Resume implements Comparable<Resume> {
         return sections;
     }
 
-    public void fillContacts(ContactType contactType, String contact) {
+    public void addContact(ContactType contactType, String contact) {
         contacts.put(contactType, contact);
     }
 
-    public void fillSection(SectionType sectionType, AbstractSection section) {
+    public void addSection(SectionType sectionType, AbstractSection section) {
         sections.put(sectionType, section);
     }
 
