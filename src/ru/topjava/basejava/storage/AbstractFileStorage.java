@@ -3,9 +3,8 @@ package ru.topjava.basejava.storage;
 import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.Resume;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +36,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     protected void addToStorage(Resume resume, File pointer) {
         try {
             if (pointer.createNewFile()) {
-                doWrite(resume, pointer);
+                doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
             }
         } catch (IOException e) {
             throw new StorageException("IO error", pointer.getName(), e);
@@ -46,12 +45,20 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
 
     @Override
     protected Resume getFromStorage(File pointer) {
-        return doRead(pointer);
+        try {
+            return doRead(new BufferedInputStream(new FileInputStream(pointer)));
+        } catch (IOException e) {
+            throw new StorageException("File read error", pointer.getName(), e);
+        }
     }
 
     @Override
     protected void updateStorage(Resume resume, File pointer) {
-        doWrite(resume, pointer);
+        try {
+            doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
+        } catch (IOException e) {
+            throw new StorageException("IO error", pointer.getName(), e);
+        }
     }
 
     @Override
@@ -67,11 +74,11 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
         if (files == null) {
             throw new StorageException("Storage is invalid", null);
         }
-        Resume[] resumes = new Resume[files.length];
-        for (int i = 0; i < resumes.length; i++) {
-            resumes[i] = doRead(files[i]);
+        List<Resume> resumes = new ArrayList<>(files.length);
+        for (File resume : files) {
+            resumes.add(getFromStorage(resume));
         }
-        return Arrays.asList(resumes);
+        return resumes;
     }
 
     @Override
@@ -94,7 +101,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
         return files.length;
     }
 
-    protected abstract void doWrite(Resume resume, File pointer);
+    protected abstract void doWrite(Resume resume, OutputStream os);
 
-    protected abstract Resume doRead(File pointer);
+    protected abstract Resume doRead(InputStream is);
 }
