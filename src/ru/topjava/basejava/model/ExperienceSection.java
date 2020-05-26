@@ -3,6 +3,7 @@ package ru.topjava.basejava.model;
 import java.util.List;
 
 public class ExperienceSection extends AbstractSection {
+    private static final long serialVersionUID = 1L;
     private final List<Experience> experiences;
 
     public ExperienceSection(List<Experience> experiences) {
@@ -17,9 +18,7 @@ public class ExperienceSection extends AbstractSection {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-
         ExperienceSection that = (ExperienceSection) object;
-
         return experiences.equals(that.experiences);
     }
 

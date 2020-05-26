@@ -7,6 +7,7 @@ import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.model.ResumeTestData;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractStorageTest {
+    protected static final File STORAGE_DIR = new File("C:\\Projects\\basejava\\storage");
     protected final Storage storage;
     private final Resume RESUME_1 = ResumeTestData.createResume("uuid1", "Большов Петр");
     private final Resume RESUME_2 = ResumeTestData.createResume("uuid2", "Альков Иван");
@@ -60,7 +62,7 @@ public abstract class AbstractStorageTest {
 
     @Test(expected = NotExistStorageException.class)
     public void getNotExistResumeTest() {
-        storage.get("");
+        storage.get("Dummy");
     }
 
     @Test

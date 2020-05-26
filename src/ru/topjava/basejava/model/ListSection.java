@@ -3,6 +3,7 @@ package ru.topjava.basejava.model;
 import java.util.List;
 
 public class ListSection extends AbstractSection {
+    private static final long serialVersionUID = 1L;
     private final List<String> data;
 
     public ListSection(List<String> data) {
@@ -13,9 +14,7 @@ public class ListSection extends AbstractSection {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-
         ListSection that = (ListSection) object;
-
         return data.equals(that.data);
     }
 

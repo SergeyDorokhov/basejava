@@ -1,15 +1,16 @@
 package ru.topjava.basejava.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Experience {
+public class Experience implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String employerName;
     private final String employerSite;
     private List<Position> positions;
-
 
     public Experience(String employerName, String employerSite, Position... positions) {
         Objects.requireNonNull(employerName);
@@ -19,7 +20,6 @@ public class Experience {
         this.employerSite = employerSite;
         this.positions = Arrays.asList(positions);
     }
-
 
     @Override
     public boolean equals(Object object) {
@@ -46,7 +46,7 @@ public class Experience {
         return builder.toString();
     }
 
-    public static class Position {
+    public static class Position implements Serializable {
         private final LocalDate startDate;
         private final LocalDate finishDate;
         private final String position;
