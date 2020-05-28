@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractFileStorage extends AbstractStorage<File> {
+public class FileStorage extends AbstractStorage<File> {
     private final File storage;
+    private final SerializationStrategy serializationStrategy;
 
-    public AbstractFileStorage(File storage) {
+    public FileStorage(File storage, SerializationStrategy serializationStrategy) {
         Objects.requireNonNull(storage, "storage must not be null");
+        Objects.requireNonNull(serializationStrategy, "strategy must not be null");
         if (!storage.isDirectory()) {
             throw new IllegalArgumentException(storage.getAbsolutePath() + " is not directory");
         }
@@ -20,6 +22,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
             throw new IllegalArgumentException(storage.getAbsolutePath() + " is not readable/writeable");
         }
         this.storage = storage;
+        this.serializationStrategy = serializationStrategy;
     }
 
     @Override
@@ -36,7 +39,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     protected void addToStorage(Resume resume, File pointer) {
         try {
             if (pointer.createNewFile()) {
-                doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
+                serializationStrategy.doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
             }
         } catch (IOException e) {
             throw new StorageException("IO error", pointer.getName(), e);
@@ -46,7 +49,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     @Override
     protected Resume getFromStorage(File pointer) {
         try {
-            return doRead(new BufferedInputStream(new FileInputStream(pointer)));
+            return serializationStrategy.doRead(new BufferedInputStream(new FileInputStream(pointer)));
         } catch (IOException e) {
             throw new StorageException("File read error", pointer.getName(), e);
         }
@@ -55,7 +58,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     @Override
     protected void updateStorage(Resume resume, File pointer) {
         try {
-            doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
+            serializationStrategy.doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
         } catch (IOException e) {
             throw new StorageException("IO error", pointer.getName(), e);
         }
@@ -100,8 +103,4 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
         }
         return files.length;
     }
-
-    protected abstract void doWrite(Resume resume, OutputStream os) throws IOException;
-
-    protected abstract Resume doRead(InputStream is) throws IOException;
 }
