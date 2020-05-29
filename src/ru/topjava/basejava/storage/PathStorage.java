@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,7 +32,8 @@ public class PathStorage extends AbstractStorage<Path> {
 
     @Override
     protected Path getPointer(String uuid) {
-        return Paths.get(storage + "\\" + uuid);
+        return storage.resolve(uuid);
+        //return Paths.get(storage + "\\" + uuid);
     }
 
     @Override
@@ -44,8 +44,7 @@ public class PathStorage extends AbstractStorage<Path> {
     @Override
     protected void addToStorage(Resume resume, Path pointer) {
         try {
-            Files.createFile(pointer);
-            serializationStrategy.doWrite(resume, new BufferedOutputStream(Files.newOutputStream(pointer)));
+            updateStorage(resume, Files.createFile(pointer));
         } catch (IOException e) {
             throw new StorageException("Error creating a file", pointer.toString(), e);
         }
@@ -81,12 +80,7 @@ public class PathStorage extends AbstractStorage<Path> {
     @Override
     protected List<Resume> getList() {
         try {
-            List<Path> files = Files.list(storage).collect(Collectors.toList());
-            List<Resume> resumes = new ArrayList<>();
-            for (Path file : files) {
-                resumes.add(getFromStorage(file));
-            }
-            return resumes;
+            return Files.list(storage).map(this::getFromStorage).collect(Collectors.toList());
         } catch (IOException e) {
             throw new StorageException("IO error", null, e);
         }
@@ -94,11 +88,7 @@ public class PathStorage extends AbstractStorage<Path> {
 
     @Override
     public void clear() {
-        try {
-            Files.list(storage).forEach(this::deleteFromStorage);
-        } catch (IOException e) {
-            throw new StorageException("Path delete error", null);
-        }
+        getList().clear();
     }
 
     @Override

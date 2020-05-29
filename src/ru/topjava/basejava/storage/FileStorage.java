@@ -39,7 +39,7 @@ public class FileStorage extends AbstractStorage<File> {
     protected void addToStorage(Resume resume, File pointer) {
         try {
             if (pointer.createNewFile()) {
-                serializationStrategy.doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
+                updateStorage(resume, pointer);
             }
         } catch (IOException e) {
             throw new StorageException("IO error", pointer.getName(), e);
@@ -73,10 +73,7 @@ public class FileStorage extends AbstractStorage<File> {
 
     @Override
     protected List<Resume> getList() {
-        File[] files = storage.listFiles();
-        if (files == null) {
-            throw new StorageException("Storage is invalid", null);
-        }
+        File[] files = getFiles();
         List<Resume> resumes = new ArrayList<>(files.length);
         for (File resume : files) {
             resumes.add(getFromStorage(resume));
@@ -86,21 +83,21 @@ public class FileStorage extends AbstractStorage<File> {
 
     @Override
     public void clear() {
-        File[] files = storage.listFiles();
-        if (files == null) {
-            throw new StorageException("Storage is invalid", null);
-        }
-        for (File file : files) {
+        for (File file : getFiles()) {
             deleteFromStorage(file);
         }
     }
 
     @Override
     public int size() {
+        return getFiles().length;
+    }
+
+    private File[] getFiles() {
         File[] files = storage.listFiles();
         if (files == null) {
             throw new StorageException("Storage is invalid", null);
         }
-        return files.length;
+        return files;
     }
 }
