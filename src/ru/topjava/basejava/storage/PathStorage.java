@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PathStorage extends AbstractStorage<Path> {
     private final Path storage;
@@ -33,7 +34,6 @@ public class PathStorage extends AbstractStorage<Path> {
     @Override
     protected Path getPointer(String uuid) {
         return storage.resolve(uuid);
-        //return Paths.get(storage + "\\" + uuid);
     }
 
     @Override
@@ -79,20 +79,24 @@ public class PathStorage extends AbstractStorage<Path> {
 
     @Override
     protected List<Resume> getList() {
-        try {
-            return Files.list(storage).map(this::getFromStorage).collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new StorageException("IO error", null, e);
-        }
+        return getStreamStorage().map(this::getFromStorage).collect(Collectors.toList());
     }
 
     @Override
     public void clear() {
-        getList().clear();
+        getStreamStorage().forEach(this::deleteFromStorage);
     }
 
     @Override
     public int size() {
         return getList().size();
+    }
+
+    private Stream<Path> getStreamStorage() {
+        try {
+            return Files.list(storage);
+        } catch (IOException e) {
+            throw new StorageException("IO error", null, e);
+        }
     }
 }
