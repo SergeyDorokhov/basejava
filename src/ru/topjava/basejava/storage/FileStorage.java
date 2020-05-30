@@ -42,7 +42,7 @@ public class FileStorage extends AbstractStorage<File> {
                 updateStorage(resume, pointer);
             }
         } catch (IOException e) {
-            throw new StorageException("IO error", pointer.getName(), e);
+            throw new StorageException("IO error", getUuid(pointer), e);
         }
     }
 
@@ -51,7 +51,7 @@ public class FileStorage extends AbstractStorage<File> {
         try {
             return serializationStrategy.doRead(new BufferedInputStream(new FileInputStream(pointer)));
         } catch (IOException e) {
-            throw new StorageException("File read error", pointer.getName(), e);
+            throw new StorageException("File read error", getUuid(pointer), e);
         }
     }
 
@@ -60,14 +60,14 @@ public class FileStorage extends AbstractStorage<File> {
         try {
             serializationStrategy.doWrite(resume, new BufferedOutputStream(new FileOutputStream(pointer)));
         } catch (IOException e) {
-            throw new StorageException("IO error", pointer.getName(), e);
+            throw new StorageException("IO error", getUuid(pointer), e);
         }
     }
 
     @Override
     protected void deleteFromStorage(File pointer) {
         if (!pointer.delete()) {
-            throw new StorageException("Delete error", pointer.getName());
+            throw new StorageException("Delete error", getUuid(pointer));
         }
     }
 
@@ -99,5 +99,9 @@ public class FileStorage extends AbstractStorage<File> {
             throw new StorageException("Storage is invalid", null);
         }
         return files;
+    }
+
+    private String getUuid(File pointer) {
+        return pointer.getName();
     }
 }
