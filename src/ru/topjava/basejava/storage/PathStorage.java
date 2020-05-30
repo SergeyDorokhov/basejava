@@ -89,7 +89,7 @@ public class PathStorage extends AbstractStorage<Path> {
 
     @Override
     public int size() {
-        return getList().size();
+        return (int) getStreamStorage().count();
     }
 
     private Stream<Path> getStreamStorage() {
