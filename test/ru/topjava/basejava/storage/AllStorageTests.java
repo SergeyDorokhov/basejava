@@ -13,7 +13,8 @@ import org.junit.runners.Suite;
                 TreeMapStorageTest.class,
                 ObjectStreamFileStorageTest.class,
                 ObjectStreamPathStorageTest.class,
-                XMLStreamPathStorageTest.class
+                XmlStreamPathStorageTest.class,
+                JsonStreamPathStorageTest.class
         })
 public class AllStorageTests {
 }
