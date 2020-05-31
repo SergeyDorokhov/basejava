@@ -2,10 +2,13 @@ package ru.topjava.basejava.model;
 
 public class TextSection extends AbstractSection {
     private static final long serialVersionUID = 1L;
-    private final String data;
+    private String data;
 
     public TextSection(String data) {
         this.data = data;
+    }
+
+    public TextSection() {
     }
 
     @Override

@@ -1,16 +1,25 @@
 package ru.topjava.basejava.model;
 
+import ru.topjava.basejava.util.LocalDateAdapter;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Experience implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final String employerName;
-    private final String employerSite;
+    private String employerName;
+    private String employerSite;
     private List<Position> positions;
+
+    public Experience() {
+    }
 
     public Experience(String employerName, String employerSite, Position... positions) {
         Objects.requireNonNull(employerName);
@@ -46,11 +55,17 @@ public class Experience implements Serializable {
         return builder.toString();
     }
 
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class Position implements Serializable {
-        private final LocalDate startDate;
-        private final LocalDate finishDate;
-        private final String position;
+        @XmlJavaTypeAdapter(LocalDateAdapter.class)
+        private LocalDate startDate;
+        @XmlJavaTypeAdapter(LocalDateAdapter.class)
+        private LocalDate finishDate;
+        private String position;
         private String description;
+
+        public Position() {
+        }
 
         public Position(LocalDate startDate, LocalDate finishDate, String position, String description) {
             Objects.requireNonNull(startDate);
