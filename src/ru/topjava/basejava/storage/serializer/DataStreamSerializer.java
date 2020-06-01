@@ -30,8 +30,8 @@ public class DataStreamSerializer implements SerializationStrategy {
                 if (section instanceof ListSection) {
                     List<String> list = ((ListSection) section).getData();
                     dos.writeInt(list.size());
-                    for (String s : list) {
-                        dos.writeUTF(s);
+                    for (String data : list) {
+                        dos.writeUTF(data);
                     }
                 }
                 if (section instanceof ExperienceSection) {
@@ -67,41 +67,58 @@ public class DataStreamSerializer implements SerializationStrategy {
                 String contact = dis.readUTF();
                 resume.addContact(contactType, contact);
             }
-            int countSection = dis.readInt();
-            for (int i = 0; i < countSection; i++) {
+            int countSections = dis.readInt();
+            for (int i = 0; i < countSections; i++) {
                 SectionType sectionType = SectionType.valueOf(dis.readUTF());
                 if (sectionType.equals(SectionType.OBJECTIVE) || sectionType.equals(SectionType.PERSONAL)) {
                     resume.addSection(sectionType, new TextSection(dis.readUTF()));
                 }
                 if (sectionType.equals(SectionType.ACHIEVEMENT) || sectionType.equals(SectionType.QUALIFICATIONS)) {
-                    int sectionSize = dis.readInt();
-                    List<String> list = new ArrayList<>(sectionSize);
-                    for (int j = 0; j < sectionSize; j++) {
-                        list.add(dis.readUTF());
-                    }
-                    resume.addSection(sectionType, new ListSection(list));
+                    int listCount = dis.readInt();
+                    resume.addSection(sectionType, new ListSection(getListData(dis, listCount)));
                 }
                 if (sectionType.equals(SectionType.EXPERIENCE) || sectionType.equals(SectionType.EDUCATION)) {
-                    int sectionSize = dis.readInt();
-                    List<Experience> experiences = new ArrayList<>(sectionSize);
-                    for (int j = 0; j < sectionSize; j++) {
-                        String employerName = dis.readUTF();
-                        String employerSite = dis.readUTF();
-                        List<Experience.Position> positions = new ArrayList<>(sectionSize);
-                        int positionsCount = dis.readInt();
-                        for (int k = 0; k < positionsCount; k++) {
-                            LocalDate startDate = LocalDate.parse(dis.readUTF());
-                            LocalDate finishDate = LocalDate.parse(dis.readUTF());
-                            String position = dis.readUTF();
-                            String description = dis.readUTF();
-                            positions.add(new Experience.Position(startDate, finishDate, position, description));
-                        }
-                        experiences.add(new Experience(employerName, employerSite, positions));
-                    }
-                    resume.addSection(sectionType, new ExperienceSection(experiences));
+                    int ExperienceCount = dis.readInt();
+                    resume.addSection(sectionType, new ExperienceSection(getExperiences(dis, ExperienceCount)));
                 }
             }
         }
         return resume;
+    }
+
+    private List<String> getListData(DataInputStream dis, int listCount) throws IOException {
+        List<String> data = new ArrayList<>();
+        for (int j = 0; j < listCount; j++) {
+            data.add(dis.readUTF());
+        }
+        return data;
+    }
+
+    private List<Experience> getExperiences(DataInputStream dis, int experienceCount) throws IOException {
+        List<Experience> experiences = new ArrayList<>(experienceCount);
+        for (int j = 0; j < experienceCount; j++) {
+            String employerName = dis.readUTF();
+            String employerSite = dis.readUTF();
+            int positionsCount = dis.readInt();
+            experiences.add(new Experience(employerName, employerSite,
+                    getPositions(dis, positionsCount)));
+        }
+        return experiences;
+    }
+
+    private List<Experience.Position> getPositions(DataInputStream dis, int positionsCount) throws IOException {
+        List<Experience.Position> positions = new ArrayList<>();
+        for (int i = 0; i < positionsCount; i++) {
+            LocalDate startDate = getLocalDate(dis);
+            LocalDate finishDate = getLocalDate(dis);
+            String position = dis.readUTF();
+            String description = dis.readUTF();
+            positions.add(new Experience.Position(startDate, finishDate, position, description));
+        }
+        return positions;
+    }
+
+    private LocalDate getLocalDate(DataInputStream dis) throws IOException {
+        return LocalDate.parse(dis.readUTF());
     }
 }
