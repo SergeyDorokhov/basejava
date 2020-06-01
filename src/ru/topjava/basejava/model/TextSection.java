@@ -11,6 +11,10 @@ public class TextSection extends AbstractSection {
     public TextSection() {
     }
 
+    public String getData() {
+        return data;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;

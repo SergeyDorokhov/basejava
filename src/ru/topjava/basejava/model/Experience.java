@@ -30,6 +30,27 @@ public class Experience implements Serializable {
         this.positions = Arrays.asList(positions);
     }
 
+    public Experience(String employerName, String employerSite, List<Position> positions) {
+        Objects.requireNonNull(employerName);
+        Objects.requireNonNull(employerSite);
+        Objects.requireNonNull(positions);
+        this.employerName = employerName;
+        this.employerSite = employerSite;
+        this.positions = positions;
+    }
+
+    public String getEmployerName() {
+        return employerName;
+    }
+
+    public String getEmployerSite() {
+        return employerSite;
+    }
+
+    public List<Position> getPositions() {
+        return positions;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
@@ -75,6 +96,22 @@ public class Experience implements Serializable {
             this.finishDate = finishDate;
             this.position = position;
             this.description = description;
+        }
+
+        public LocalDate getStartDate() {
+            return startDate;
+        }
+
+        public LocalDate getFinishDate() {
+            return finishDate;
+        }
+
+        public String getPosition() {
+            return position;
+        }
+
+        public String getDescription() {
+            return description;
         }
 
         @Override
