@@ -22,17 +22,11 @@ public class Experience implements Serializable {
     }
 
     public Experience(String employerName, String employerSite, Position... positions) {
-        Objects.requireNonNull(employerName);
-        Objects.requireNonNull(employerSite);
-        Objects.requireNonNull(positions);
-        this.employerName = employerName;
-        this.employerSite = employerSite;
-        this.positions = Arrays.asList(positions);
+        this(employerName, employerSite, Arrays.asList(positions));
     }
 
     public Experience(String employerName, String employerSite, List<Position> positions) {
         Objects.requireNonNull(employerName);
-        Objects.requireNonNull(employerSite);
         Objects.requireNonNull(positions);
         this.employerName = employerName;
         this.employerSite = employerSite;
@@ -57,7 +51,7 @@ public class Experience implements Serializable {
         if (object == null || getClass() != object.getClass()) return false;
         Experience that = (Experience) object;
         return employerName.equals(that.employerName) &&
-                employerSite.equals(that.employerSite) &&
+                Objects.equals(employerSite, that.employerSite) &&
                 positions.equals(that.positions);
     }
 
@@ -91,7 +85,7 @@ public class Experience implements Serializable {
         public Position(LocalDate startDate, LocalDate finishDate, String position, String description) {
             Objects.requireNonNull(startDate);
             Objects.requireNonNull(finishDate);
-            Objects.requireNonNull(description);
+            Objects.requireNonNull(position);
             this.startDate = startDate;
             this.finishDate = finishDate;
             this.position = position;
@@ -122,7 +116,7 @@ public class Experience implements Serializable {
             return startDate.equals(position1.startDate) &&
                     finishDate.equals(position1.finishDate) &&
                     position.equals(position1.position) &&
-                    description.equals(position1.description);
+                    Objects.equals(description, position1.description);
         }
 
         @Override

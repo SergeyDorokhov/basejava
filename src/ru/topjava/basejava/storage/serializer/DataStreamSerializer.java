@@ -17,38 +17,46 @@ public class DataStreamSerializer implements SerializationStrategy {
             dos.writeUTF(resume.getFullName());
             dos.writeInt(resume.getContacts().size());
             for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
-                dos.writeUTF(entry.getKey().toString());
+                dos.writeUTF(entry.getKey().name());
                 dos.writeUTF(entry.getValue());
             }
             dos.writeInt(resume.getSections().size());
             for (Map.Entry<SectionType, AbstractSection> entry : resume.getSections().entrySet()) {
-                dos.writeUTF(entry.getKey().toString());
+                SectionType sectionType = entry.getKey();
+                dos.writeUTF(sectionType.name());
                 AbstractSection section = entry.getValue();
-                if (section instanceof TextSection) {
-                    dos.writeUTF(((TextSection) section).getData());
-                }
-                if (section instanceof ListSection) {
-                    List<String> list = ((ListSection) section).getData();
-                    dos.writeInt(list.size());
-                    for (String data : list) {
-                        dos.writeUTF(data);
-                    }
-                }
-                if (section instanceof ExperienceSection) {
-                    List<Experience> experiences = ((ExperienceSection) section).getExperiences();
-                    dos.writeInt(experiences.size());
-                    for (Experience experience : experiences) {
-                        dos.writeUTF(experience.getEmployerName());
-                        dos.writeUTF(experience.getEmployerSite());
-                        List<Experience.Position> positions = experience.getPositions();
-                        dos.writeInt(positions.size());
-                        for (Experience.Position position : positions) {
-                            dos.writeUTF(position.getStartDate().toString());
-                            dos.writeUTF(position.getFinishDate().toString());
-                            dos.writeUTF(position.getPosition());
-                            dos.writeUTF(position.getDescription());
+                switch (sectionType) {
+                    case OBJECTIVE:
+                    case PERSONAL:
+                        dos.writeUTF(((TextSection) section).getData());
+                        break;
+                    case ACHIEVEMENT:
+                    case QUALIFICATIONS:
+                        List<String> list = ((ListSection) section).getData();
+                        dos.writeInt(list.size());
+                        for (String data : list) {
+                            dos.writeUTF(data);
                         }
-                    }
+                        break;
+                    case EXPERIENCE:
+                    case EDUCATION:
+                        List<Experience> experiences = ((ExperienceSection) section).getExperiences();
+                        dos.writeInt(experiences.size());
+                        for (Experience experience : experiences) {
+                            dos.writeUTF(experience.getEmployerName());
+                            writeIfExist(dos, experience.getEmployerSite());
+                            List<Experience.Position> positions = experience.getPositions();
+                            dos.writeInt(positions.size());
+                            for (Experience.Position position : positions) {
+                                dos.writeUTF(position.getStartDate().toString());
+                                dos.writeUTF(position.getFinishDate().toString());
+                                dos.writeUTF(position.getPosition());
+                                writeIfExist(dos, position.getDescription());
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -70,16 +78,23 @@ public class DataStreamSerializer implements SerializationStrategy {
             int countSections = dis.readInt();
             for (int i = 0; i < countSections; i++) {
                 SectionType sectionType = SectionType.valueOf(dis.readUTF());
-                if (sectionType.equals(SectionType.OBJECTIVE) || sectionType.equals(SectionType.PERSONAL)) {
-                    resume.addSection(sectionType, new TextSection(dis.readUTF()));
-                }
-                if (sectionType.equals(SectionType.ACHIEVEMENT) || sectionType.equals(SectionType.QUALIFICATIONS)) {
-                    int listCount = dis.readInt();
-                    resume.addSection(sectionType, new ListSection(getListData(dis, listCount)));
-                }
-                if (sectionType.equals(SectionType.EXPERIENCE) || sectionType.equals(SectionType.EDUCATION)) {
-                    int ExperienceCount = dis.readInt();
-                    resume.addSection(sectionType, new ExperienceSection(getExperiences(dis, ExperienceCount)));
+                switch (sectionType) {
+                    case OBJECTIVE:
+                    case PERSONAL:
+                        resume.addSection(sectionType, new TextSection(dis.readUTF()));
+                        break;
+                    case ACHIEVEMENT:
+                    case QUALIFICATIONS:
+                        int listCount = dis.readInt();
+                        resume.addSection(sectionType, new ListSection(getListData(dis, listCount)));
+                        break;
+                    case EXPERIENCE:
+                    case EDUCATION:
+                        int ExperienceCount = dis.readInt();
+                        resume.addSection(sectionType, new ExperienceSection(getExperiences(dis, ExperienceCount)));
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -98,7 +113,7 @@ public class DataStreamSerializer implements SerializationStrategy {
         List<Experience> experiences = new ArrayList<>(experienceCount);
         for (int j = 0; j < experienceCount; j++) {
             String employerName = dis.readUTF();
-            String employerSite = dis.readUTF();
+            String employerSite = readIfExist(dis);
             int positionsCount = dis.readInt();
             experiences.add(new Experience(employerName, employerSite,
                     getPositions(dis, positionsCount)));
@@ -112,10 +127,23 @@ public class DataStreamSerializer implements SerializationStrategy {
             LocalDate startDate = getLocalDate(dis);
             LocalDate finishDate = getLocalDate(dis);
             String position = dis.readUTF();
-            String description = dis.readUTF();
+            String description = readIfExist(dis);
             positions.add(new Experience.Position(startDate, finishDate, position, description));
         }
         return positions;
+    }
+
+    private void writeIfExist(DataOutputStream dos, String string) throws IOException {
+        int isExist = string != null ? 1 : 0;
+        dos.writeInt(isExist);
+        if (isExist == 1) {
+            dos.writeUTF(string);
+        }
+    }
+
+    private String readIfExist(DataInputStream dis) throws IOException {
+        int isExist = dis.readInt();
+        return isExist == 1 ? dis.readUTF() : null;
     }
 
     private LocalDate getLocalDate(DataInputStream dis) throws IOException {

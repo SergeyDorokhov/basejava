@@ -34,8 +34,10 @@ public class ResumeData {
             DateUtil.of(1996, Month.JULY), "Аспирантура", "(программист С, С++)"),
             new Experience.Position(DateUtil.of(1987, Month.SEPTEMBER),
                     DateUtil.of(1993, Month.JULY), "Инженер", "(программист Fortran, C)"));
+    private final Experience experienceWithNull = new Experience("Test", null, new Experience.Position(DateUtil.of(2000, Month.JANUARY),
+            DateUtil.of(2000, Month.FEBRUARY), "Test", null));
     private final List<Experience> experiences = Arrays.asList(javaOnlineProjects);
-    private final List<Experience> education = Arrays.asList(university);
+    private final List<Experience> education = Arrays.asList(university, experienceWithNull);
 
     public String getFullName() {
         return fullName;
