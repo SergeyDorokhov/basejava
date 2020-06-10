@@ -4,9 +4,7 @@ import ru.topjava.basejava.model.*;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataStreamSerializer implements SerializationStrategy {
 
@@ -15,13 +13,13 @@ public class DataStreamSerializer implements SerializationStrategy {
         try (DataOutputStream dos = new DataOutputStream(os)) {
             dos.writeUTF(resume.getUuid());
             dos.writeUTF(resume.getFullName());
-            dos.writeInt(resume.getContacts().size());
-            for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
+            Set<Map.Entry<ContactType, String>> collectionContacts = resume.getContacts().entrySet();
+            writeData(dos, collectionContacts, entry -> {
                 dos.writeUTF(entry.getKey().name());
                 dos.writeUTF(entry.getValue());
-            }
-            dos.writeInt(resume.getSections().size());
-            for (Map.Entry<SectionType, AbstractSection> entry : resume.getSections().entrySet()) {
+            });
+            Set<Map.Entry<SectionType, AbstractSection>> collectionSections = resume.getSections().entrySet();
+            writeData(dos, collectionSections, entry -> {
                 SectionType sectionType = entry.getKey();
                 dos.writeUTF(sectionType.name());
                 AbstractSection section = entry.getValue();
@@ -33,32 +31,27 @@ public class DataStreamSerializer implements SerializationStrategy {
                     case ACHIEVEMENT:
                     case QUALIFICATIONS:
                         List<String> list = ((ListSection) section).getData();
-                        dos.writeInt(list.size());
-                        for (String data : list) {
-                            dos.writeUTF(data);
-                        }
+                        writeData(dos, list, dos::writeUTF);
                         break;
                     case EXPERIENCE:
                     case EDUCATION:
                         List<Experience> experiences = ((ExperienceSection) section).getExperiences();
-                        dos.writeInt(experiences.size());
-                        for (Experience experience : experiences) {
+                        writeData(dos, experiences, experience -> {
                             dos.writeUTF(experience.getEmployerName());
                             writeIfExist(dos, experience.getEmployerSite());
                             List<Experience.Position> positions = experience.getPositions();
-                            dos.writeInt(positions.size());
-                            for (Experience.Position position : positions) {
+                            writeData(dos, positions, position -> {
                                 dos.writeUTF(position.getStartDate().toString());
                                 dos.writeUTF(position.getFinishDate().toString());
                                 dos.writeUTF(position.getPosition());
                                 writeIfExist(dos, position.getDescription());
-                            }
-                        }
+                            });
+                        });
                         break;
                     default:
                         break;
                 }
-            }
+            });
         }
     }
 
@@ -69,36 +62,33 @@ public class DataStreamSerializer implements SerializationStrategy {
             String uuid = dis.readUTF();
             String fullName = dis.readUTF();
             resume = new Resume(uuid, fullName);
-            int countContacts = dis.readInt();
-            for (int i = 0; i < countContacts; i++) {
-                ContactType contactType = ContactType.valueOf(dis.readUTF());
-                String contact = dis.readUTF();
-                resume.addContact(contactType, contact);
-            }
-            int countSections = dis.readInt();
-            for (int i = 0; i < countSections; i++) {
+            readData(dis, () -> {
+                resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF());
+            });
+            readData(dis, () -> {
                 SectionType sectionType = SectionType.valueOf(dis.readUTF());
-                switch (sectionType) {
-                    case OBJECTIVE:
-                    case PERSONAL:
-                        resume.addSection(sectionType, new TextSection(dis.readUTF()));
-                        break;
-                    case ACHIEVEMENT:
-                    case QUALIFICATIONS:
-                        int listCount = dis.readInt();
-                        resume.addSection(sectionType, new ListSection(getListData(dis, listCount)));
-                        break;
-                    case EXPERIENCE:
-                    case EDUCATION:
-                        int ExperienceCount = dis.readInt();
-                        resume.addSection(sectionType, new ExperienceSection(getExperiences(dis, ExperienceCount)));
-                        break;
-                    default:
-                        break;
-                }
-            }
+                resume.addSection(sectionType, takeSection(dis, sectionType));
+            });
         }
         return resume;
+    }
+
+    private AbstractSection takeSection(DataInputStream dis, SectionType sectionType) throws IOException {
+        switch (sectionType) {
+            case OBJECTIVE:
+            case PERSONAL:
+                return new TextSection(dis.readUTF());
+            case ACHIEVEMENT:
+            case QUALIFICATIONS:
+                int listCount = dis.readInt();
+                return new ListSection(getListData(dis, listCount));
+            case EXPERIENCE:
+            case EDUCATION:
+                int ExperienceCount = dis.readInt();
+                return new ExperienceSection(getExperiences(dis, ExperienceCount));
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     private List<String> getListData(DataInputStream dis, int listCount) throws IOException {
@@ -134,19 +124,39 @@ public class DataStreamSerializer implements SerializationStrategy {
     }
 
     private void writeIfExist(DataOutputStream dos, String string) throws IOException {
-        int isExist = string != null ? 1 : 0;
-        dos.writeInt(isExist);
-        if (isExist == 1) {
-            dos.writeUTF(string);
-        }
+        String stringToWrite = (string != null) ? string : "";
+        dos.writeUTF(stringToWrite);
     }
 
     private String readIfExist(DataInputStream dis) throws IOException {
-        int isExist = dis.readInt();
-        return isExist == 1 ? dis.readUTF() : null;
+        String content = dis.readUTF();
+        return content.equals("") ? null : content;
     }
 
     private LocalDate getLocalDate(DataInputStream dis) throws IOException {
         return LocalDate.parse(dis.readUTF());
+    }
+
+    private <T> void writeData(DataOutputStream dos, Collection<T> collection
+            , Writer<T> writer) throws IOException {
+        dos.writeInt(collection.size());
+        for (T t : collection) {
+            writer.writeElement(t);
+        }
+    }
+
+    private interface Writer<T> {
+        void writeElement(T t) throws IOException;
+    }
+
+    private void readData(DataInputStream dis, DoAction doAction) throws IOException {
+        int size = dis.readInt();
+        for (int i = 0; i < size; i++) {
+            doAction.addData();
+        }
+    }
+
+    private interface DoAction<T> {
+        void addData() throws IOException;
     }
 }
