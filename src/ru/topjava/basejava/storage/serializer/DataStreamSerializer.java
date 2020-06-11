@@ -57,23 +57,22 @@ public class DataStreamSerializer implements SerializationStrategy {
 
     @Override
     public Resume doRead(InputStream is) throws IOException {
-        Resume resume;
         try (DataInputStream dis = new DataInputStream(is)) {
             String uuid = dis.readUTF();
             String fullName = dis.readUTF();
-            resume = new Resume(uuid, fullName);
+            Resume resume = new Resume(uuid, fullName);
             readData(dis, () -> {
                 resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF());
             });
             readData(dis, () -> {
                 SectionType sectionType = SectionType.valueOf(dis.readUTF());
-                resume.addSection(sectionType, takeSection(dis, sectionType));
+                resume.addSection(sectionType, readSection(dis, sectionType));
             });
+            return resume;
         }
-        return resume;
     }
 
-    private AbstractSection takeSection(DataInputStream dis, SectionType sectionType) throws IOException {
+    private AbstractSection readSection(DataInputStream dis, SectionType sectionType) throws IOException {
         switch (sectionType) {
             case OBJECTIVE:
             case PERSONAL:
@@ -156,7 +155,7 @@ public class DataStreamSerializer implements SerializationStrategy {
         }
     }
 
-    private interface DoAction<T> {
+    private interface DoAction {
         void addData() throws IOException;
     }
 }
