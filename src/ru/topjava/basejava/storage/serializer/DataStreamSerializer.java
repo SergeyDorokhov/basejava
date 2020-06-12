@@ -79,8 +79,7 @@ public class DataStreamSerializer implements SerializationStrategy {
                 return new TextSection(dis.readUTF());
             case ACHIEVEMENT:
             case QUALIFICATIONS:
-                int listCount = dis.readInt();
-                return new ListSection(getListData(dis, listCount));
+                return new ListSection(getListData(dis, dis::readUTF));
             case EXPERIENCE:
             case EDUCATION:
                 int ExperienceCount = dis.readInt();
@@ -90,10 +89,11 @@ public class DataStreamSerializer implements SerializationStrategy {
         }
     }
 
-    private List<String> getListData(DataInputStream dis, int listCount) throws IOException {
-        List<String> data = new ArrayList<>();
-        for (int j = 0; j < listCount; j++) {
-            data.add(dis.readUTF());
+    private <T> List<T> getListData(DataInputStream dis, Reader<T> reader) throws IOException {
+        int listCount = dis.readInt();
+        List<T> data = new ArrayList<>(listCount);
+        for (int i = 0; i < listCount; i++) {
+            data.add(reader.readElement());
         }
         return data;
     }
@@ -146,6 +146,10 @@ public class DataStreamSerializer implements SerializationStrategy {
 
     private interface Writer<T> {
         void writeElement(T t) throws IOException;
+    }
+
+    private interface Reader<T> {
+        T readElement() throws IOException;
     }
 
     private void readData(DataInputStream dis, DoAction doAction) throws IOException {
