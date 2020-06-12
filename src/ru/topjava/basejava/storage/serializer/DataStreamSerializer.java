@@ -82,8 +82,7 @@ public class DataStreamSerializer implements SerializationStrategy {
                 return new ListSection(getListData(dis, dis::readUTF));
             case EXPERIENCE:
             case EDUCATION:
-                int ExperienceCount = dis.readInt();
-                return new ExperienceSection(getExperiences(dis, ExperienceCount));
+                return new ExperienceSection(getExperiences(dis));
             default:
                 throw new IllegalStateException();
         }
@@ -98,28 +97,14 @@ public class DataStreamSerializer implements SerializationStrategy {
         return data;
     }
 
-    private List<Experience> getExperiences(DataInputStream dis, int experienceCount) throws IOException {
-        List<Experience> experiences = new ArrayList<>(experienceCount);
-        for (int j = 0; j < experienceCount; j++) {
-            String employerName = dis.readUTF();
-            String employerSite = readIfExist(dis);
-            int positionsCount = dis.readInt();
-            experiences.add(new Experience(employerName, employerSite,
-                    getPositions(dis, positionsCount)));
-        }
-        return experiences;
+    private List<Experience> getExperiences(DataInputStream dis) throws IOException {
+        return getListData(dis, () -> (
+                new Experience(dis.readUTF(), readIfExist(dis), getPositions(dis))));
     }
 
-    private List<Experience.Position> getPositions(DataInputStream dis, int positionsCount) throws IOException {
-        List<Experience.Position> positions = new ArrayList<>();
-        for (int i = 0; i < positionsCount; i++) {
-            LocalDate startDate = getLocalDate(dis);
-            LocalDate finishDate = getLocalDate(dis);
-            String position = dis.readUTF();
-            String description = readIfExist(dis);
-            positions.add(new Experience.Position(startDate, finishDate, position, description));
-        }
-        return positions;
+    private List<Experience.Position> getPositions(DataInputStream dis) throws IOException {
+        return getListData(dis, () -> (
+                new Experience.Position(getLocalDate(dis), getLocalDate(dis), dis.readUTF(), readIfExist(dis))));
     }
 
     private void writeIfExist(DataOutputStream dos, String string) throws IOException {
