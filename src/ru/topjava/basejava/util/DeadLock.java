@@ -1,8 +1,8 @@
 package ru.topjava.basejava.util;
 
 public class DeadLock {
-    private static final Student student = new Student();
-    private static final Teacher teacher = new Teacher();
+    private static final Student STUDENT = new Student();
+    private static final Teacher TEACHER = new Teacher();
 
     public static class Teacher {
 
@@ -20,20 +20,20 @@ public class DeadLock {
 
     public static void main(String[] args) {
         new Thread(() -> {
-            synchronized (student) {
+            synchronized (STUDENT) {
                 sleep();
-                System.out.println(student.getName());
-                synchronized (teacher) {
-                    System.out.println(teacher.getName());
+                System.out.println(STUDENT.getName());
+                synchronized (TEACHER) {
+                    System.out.println(TEACHER.getName());
                 }
             }
         }).start();
         new Thread(() -> {
-            synchronized (teacher) {
+            synchronized (TEACHER) {
                 sleep();
-                System.out.println(teacher.getName());
-                synchronized (student) {
-                    System.out.println(student.getName());
+                System.out.println(TEACHER.getName());
+                synchronized (STUDENT) {
+                    System.out.println(STUDENT.getName());
                 }
             }
         }).start();
