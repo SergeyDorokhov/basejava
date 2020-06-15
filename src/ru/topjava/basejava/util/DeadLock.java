@@ -1,39 +1,21 @@
 package ru.topjava.basejava.util;
 
 public class DeadLock {
-    private static final Student STUDENT = new Student();
-    private static final Teacher TEACHER = new Teacher();
-
-    public static class Teacher {
-
-        public String getName() {
-            return "Teacher";
-        }
-    }
-
-    public static class Student {
-
-        public String getName() {
-            return "Student";
-        }
-    }
+    private static final String OBJECT_ONE = "objectOne";
+    private static final String OBJECT_TWO = "objectTwo";
 
     public static void main(String[] args) {
+        workWithObjects(OBJECT_ONE, OBJECT_TWO);
+        workWithObjects(OBJECT_TWO, OBJECT_ONE);
+    }
+
+    private static void workWithObjects(String objectOne, String objectTwo) {
         new Thread(() -> {
-            synchronized (STUDENT) {
+            synchronized (objectOne) {
                 sleep();
-                System.out.println(STUDENT.getName());
-                synchronized (TEACHER) {
-                    System.out.println(TEACHER.getName());
-                }
-            }
-        }).start();
-        new Thread(() -> {
-            synchronized (TEACHER) {
-                sleep();
-                System.out.println(TEACHER.getName());
-                synchronized (STUDENT) {
-                    System.out.println(STUDENT.getName());
+                System.out.println(objectOne);
+                synchronized (objectTwo) {
+                    System.out.println(objectTwo);
                 }
             }
         }).start();
