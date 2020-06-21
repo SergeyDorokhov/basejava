@@ -12,7 +12,6 @@ public class StreamWork {
 
     public static List<Integer> oddOrEven(List<Integer> integers) {
         boolean isEven = integers.stream().mapToInt(s -> s).sum() % 2 == 0;
-        return integers.stream().filter(o -> ((isEven) && (o % 2 != 0))
-                || ((!isEven) && (o % 2 == 0))).collect(Collectors.toList());
+        return integers.stream().filter(o -> isEven ^ (o % 2 == 0)).collect(Collectors.toList());
     }
 }
