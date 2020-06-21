@@ -2,6 +2,7 @@ package ru.topjava.basejava.storage;
 
 import org.junit.Before;
 import org.junit.Test;
+import ru.topjava.basejava.Config;
 import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
@@ -15,7 +16,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractStorageTest {
-    protected static final String STORAGE_DIRECTORY = "C:\\Projects\\basejava\\storage";
+    protected static final String STORAGE_DIRECTORY = Config.get().getProperties().getProperty("storage.dir");
     protected static final File STORAGE_DIR = new File(STORAGE_DIRECTORY);
     protected final Storage storage;
     private final Resume RESUME_1 = ResumeTestData.createResume("uuid1", "Большов Петр");
