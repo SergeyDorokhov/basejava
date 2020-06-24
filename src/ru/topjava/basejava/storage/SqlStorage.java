@@ -6,6 +6,7 @@ import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.util.SqlHelper;
 
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,15 +30,20 @@ public class SqlStorage implements Storage {
 
     @Override
     public void clear() {
-        helper.connectAndQuery(conn -> conn.prepareStatement(DELETE_RESUMES).execute());
+        helper.connectAndQuery(conn -> {
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_RESUMES)) {
+                ps.execute();
+            }
+            return null;
+        });
     }
 
     @Override
     public void save(Resume resume) {
         LOG.info("Save " + resume);
         helper.connectAndQuery(conn -> {
-            try {
-                helper.doStatement(conn, INSERT_RESUME, resume.getUuid(), resume.getFullName()).execute();
+            try (PreparedStatement ps = helper.doStatement(conn, INSERT_RESUME, resume.getUuid(), resume.getFullName())) {
+                ps.execute();
             } catch (SQLException e) {
                 LOG.warning("Resume " + resume.getUuid() + " exist");
                 throw new ExistStorageException(resume.getUuid());
@@ -50,12 +56,13 @@ public class SqlStorage implements Storage {
     public Resume get(String uuid) {
         LOG.info("Get " + uuid);
         return helper.connectAndQuery(conn -> {
-            ResultSet result = helper.doStatement(conn, SELECT_RESUME, uuid).executeQuery();
-            if (result.next()) {
-                return new Resume(uuid, result.getString("full_name"));
+            try (ResultSet result = helper.doStatement(conn, SELECT_RESUME, uuid).executeQuery()) {
+                if (result.next()) {
+                    return new Resume(uuid, result.getString("full_name"));
+                }
+                LOG.warning("Resume " + uuid + " not exist");
+                throw new NotExistStorageException(uuid);
             }
-            LOG.warning("Resume " + uuid + " not exist");
-            throw new NotExistStorageException(uuid);
         });
     }
 
@@ -63,9 +70,10 @@ public class SqlStorage implements Storage {
     public void update(Resume resume) {
         LOG.info("Update " + resume);
         helper.connectAndQuery(conn -> {
-            if (helper.doStatement(conn, UPDATE_RESUME, resume.getFullName()
-                    , resume.getUuid()).executeUpdate() == 0) {
-                throw new NotExistStorageException(resume.getUuid());
+            try (PreparedStatement ps = helper.doStatement(conn, UPDATE_RESUME, resume.getFullName(), resume.getUuid())) {
+                if (ps.executeUpdate() == 0) {
+                    throw new NotExistStorageException(resume.getUuid());
+                }
             }
             return null;
         });
@@ -75,8 +83,10 @@ public class SqlStorage implements Storage {
     public void delete(String uuid) {
         LOG.info("Delete " + uuid);
         helper.connectAndQuery(conn -> {
-            if (helper.doStatement(conn, DELETE_RESUME, uuid).executeUpdate() == 0) {
-                throw new NotExistStorageException(uuid);
+            try (PreparedStatement ps = helper.doStatement(conn, DELETE_RESUME, uuid)) {
+                if (ps.executeUpdate() == 0) {
+                    throw new NotExistStorageException(uuid);
+                }
             }
             return null;
         });
@@ -85,11 +95,12 @@ public class SqlStorage implements Storage {
     @Override
     public List<Resume> getAllSorted() {
         return helper.connectAndQuery(conn -> {
-            ResultSet result = conn.prepareStatement(SELECT_RESUMES).executeQuery();
             List<Resume> resumes = new ArrayList<>();
-            while (result.next()) {
-                resumes.add(new Resume(result.getString("uuid").trim()
-                        , result.getString("full_name")));
+            try (ResultSet result = conn.prepareStatement(SELECT_RESUMES).executeQuery()) {
+                while (result.next()) {
+                    resumes.add(new Resume(result.getString("uuid").trim()
+                            , result.getString("full_name")));
+                }
             }
             return resumes;
         });
@@ -98,8 +109,9 @@ public class SqlStorage implements Storage {
     @Override
     public int size() {
         return helper.connectAndQuery((conn -> {
-            ResultSet selectCount = conn.prepareStatement(COUNT_RESUMES).executeQuery();
-            return selectCount.next() ? selectCount.getInt("COUNT") : 0;
+            try (ResultSet selectCount = conn.prepareStatement(COUNT_RESUMES).executeQuery()) {
+                return selectCount.next() ? selectCount.getInt("COUNT") : 0;
+            }
         }));
     }
 }
