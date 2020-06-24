@@ -7,6 +7,7 @@ import ru.topjava.basejava.util.SqlHelper;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -35,12 +36,13 @@ public class SqlStorage implements Storage {
     public void save(Resume resume) {
         LOG.info("Save " + resume);
         helper.connectAndQuery(conn -> {
-            ResultSet result = helper.doStatement(conn, SELECT_RESUME, resume.getUuid()).executeQuery();
-            if (result.next()) {
+            try {
+                helper.doStatement(conn, INSERT_RESUME, resume.getUuid(), resume.getFullName()).execute();
+            } catch (SQLException e) {
                 LOG.warning("Resume " + resume.getUuid() + " exist");
                 throw new ExistStorageException(resume.getUuid());
             }
-            return helper.doStatement(conn, INSERT_RESUME, resume.getUuid(), resume.getFullName()).execute();
+            return null;
         });
     }
 
