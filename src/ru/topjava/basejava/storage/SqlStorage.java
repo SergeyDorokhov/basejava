@@ -30,10 +30,8 @@ public class SqlStorage implements Storage {
 
     @Override
     public void clear() {
-        helper.connectAndQuery(conn -> {
-            try (PreparedStatement ps = conn.prepareStatement(DELETE_RESUMES)) {
-                ps.execute();
-            }
+        helper.connectAndQuery(DELETE_RESUMES, ps -> {
+            ps.execute();
             return null;
         });
     }
@@ -41,12 +39,14 @@ public class SqlStorage implements Storage {
     @Override
     public void save(Resume resume) {
         LOG.info("Save " + resume);
-        helper.connectAndQuery(conn -> {
-            try (PreparedStatement ps = helper.doStatement(conn, INSERT_RESUME, resume.getUuid(), resume.getFullName())) {
-                ps.execute();
+        helper.connectAndQuery(INSERT_RESUME, ps -> {
+            try {
+                helper.doStatement(ps, resume.getUuid(), resume.getFullName()).execute();
             } catch (SQLException e) {
-                LOG.warning("Resume " + resume.getUuid() + " exist");
-                throw new ExistStorageException(resume.getUuid());
+                if (e.getSQLState().equals("23505")) {
+                    LOG.warning("Resume " + resume.getUuid() + " exist");
+                    throw new ExistStorageException(resume.getUuid());
+                }
             }
             return null;
         });
@@ -55,8 +55,8 @@ public class SqlStorage implements Storage {
     @Override
     public Resume get(String uuid) {
         LOG.info("Get " + uuid);
-        return helper.connectAndQuery(conn -> {
-            try (ResultSet result = helper.doStatement(conn, SELECT_RESUME, uuid).executeQuery()) {
+        return helper.connectAndQuery(SELECT_RESUME, ps -> {
+            try (ResultSet result = helper.doStatement(ps, uuid).executeQuery()) {
                 if (result.next()) {
                     return new Resume(uuid, result.getString("full_name"));
                 }
@@ -69,12 +69,9 @@ public class SqlStorage implements Storage {
     @Override
     public void update(Resume resume) {
         LOG.info("Update " + resume);
-        helper.connectAndQuery(conn -> {
-            try (PreparedStatement ps = helper.doStatement(conn, UPDATE_RESUME, resume.getFullName(), resume.getUuid())) {
-                if (ps.executeUpdate() == 0) {
-                    throw new NotExistStorageException(resume.getUuid());
-                }
-            }
+        helper.connectAndQuery(UPDATE_RESUME, ps -> {
+            PreparedStatement preparedStatement = helper.doStatement(ps, resume.getFullName(), resume.getUuid());
+            executeStatement(preparedStatement, resume.getUuid());
             return null;
         });
     }
@@ -82,21 +79,18 @@ public class SqlStorage implements Storage {
     @Override
     public void delete(String uuid) {
         LOG.info("Delete " + uuid);
-        helper.connectAndQuery(conn -> {
-            try (PreparedStatement ps = helper.doStatement(conn, DELETE_RESUME, uuid)) {
-                if (ps.executeUpdate() == 0) {
-                    throw new NotExistStorageException(uuid);
-                }
-            }
+        helper.connectAndQuery(DELETE_RESUME, ps -> {
+            PreparedStatement preparedStatement = helper.doStatement(ps, uuid);
+            executeStatement(preparedStatement, uuid);
             return null;
         });
     }
 
     @Override
     public List<Resume> getAllSorted() {
-        return helper.connectAndQuery(conn -> {
+        return helper.connectAndQuery(SELECT_RESUMES, ps -> {
             List<Resume> resumes = new ArrayList<>();
-            try (ResultSet result = conn.prepareStatement(SELECT_RESUMES).executeQuery()) {
+            try (ResultSet result = ps.executeQuery()) {
                 while (result.next()) {
                     resumes.add(new Resume(result.getString("uuid").trim()
                             , result.getString("full_name")));
@@ -108,10 +102,16 @@ public class SqlStorage implements Storage {
 
     @Override
     public int size() {
-        return helper.connectAndQuery((conn -> {
-            try (ResultSet selectCount = conn.prepareStatement(COUNT_RESUMES).executeQuery()) {
+        return helper.connectAndQuery(COUNT_RESUMES, ps -> {
+            try (ResultSet selectCount = ps.executeQuery()) {
                 return selectCount.next() ? selectCount.getInt("COUNT") : 0;
             }
-        }));
+        });
+    }
+
+    private void executeStatement(PreparedStatement preparedStatement, String uuid) throws SQLException {
+        if (preparedStatement.executeUpdate() == 0) {
+            throw new NotExistStorageException(uuid);
+        }
     }
 }

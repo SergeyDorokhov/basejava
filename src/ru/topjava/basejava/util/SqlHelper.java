@@ -15,23 +15,23 @@ public class SqlHelper {
     }
 
     public interface Query<T> {
-        T execute(Connection connection) throws SQLException;
+        T execute(PreparedStatement ps) throws SQLException;
     }
 
-    public <T> T connectAndQuery(Query<T> query) {
+    public <T> T connectAndQuery(String sql, Query<T> query) {
         try (Connection connection = connectionFactory.getConnection()) {
-            return query.execute(connection);
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                return query.execute(ps);
+            }
         } catch (SQLException e) {
             throw new StorageException(e);
         }
     }
 
-    public PreparedStatement doStatement(Connection connection,
-                                         String query, String... nameOfIndex) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
+    public PreparedStatement doStatement(PreparedStatement ps, String... nameOfIndex) throws SQLException {
         for (int i = 0; i < nameOfIndex.length; i++) {
-            preparedStatement.setString(i + 1, nameOfIndex[i]);
+            ps.setString(i + 1, nameOfIndex[i]);
         }
-        return preparedStatement;
+        return ps;
     }
 }
