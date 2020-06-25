@@ -1,6 +1,8 @@
 package ru.topjava.basejava.util;
 
+import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.StorageException;
+import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.sql.ConnectionFactory;
 
 import java.sql.Connection;
@@ -19,10 +21,9 @@ public class SqlHelper {
     }
 
     public <T> T connectAndQuery(String sql, Query<T> query) {
-        try (Connection connection = connectionFactory.getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                return query.execute(ps);
-            }
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            return query.execute(ps);
         } catch (SQLException e) {
             throw new StorageException(e);
         }
@@ -33,5 +34,12 @@ public class SqlHelper {
             ps.setString(i + 1, nameOfIndex[i]);
         }
         return ps;
+    }
+
+    public void processException(Resume resume, SQLException e) {
+        if (e.getSQLState().equals("23505")) {
+            throw new ExistStorageException(resume.getUuid());
+        }
+        throw new StorageException(e);
     }
 }

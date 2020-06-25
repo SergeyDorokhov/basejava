@@ -1,6 +1,5 @@
 package ru.topjava.basejava.storage;
 
-import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.util.SqlHelper;
@@ -43,10 +42,7 @@ public class SqlStorage implements Storage {
             try {
                 helper.doStatement(ps, resume.getUuid(), resume.getFullName()).execute();
             } catch (SQLException e) {
-                if (e.getSQLState().equals("23505")) {
-                    LOG.warning("Resume " + resume.getUuid() + " exist");
-                    throw new ExistStorageException(resume.getUuid());
-                }
+                helper.processException(resume, e);
             }
             return null;
         });
