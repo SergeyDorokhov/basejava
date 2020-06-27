@@ -1,7 +1,6 @@
 package ru.topjava.basejava.storage;
 
 import ru.topjava.basejava.Exception.NotExistStorageException;
-import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.ContactType;
 import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.util.SqlHelper;
@@ -45,24 +44,22 @@ public class SqlStorage implements Storage {
     @Override
     public void save(Resume resume) {
         LOG.info("Save " + resume);
-        helper.transactionalExecute(conn -> {
-            try (PreparedStatement ps = conn.prepareStatement(INSERT_RESUME)) {
+        helper.connectAndQuery(INSERT_RESUME, ps -> {
+            try {
                 helper.doStatement(ps, resume.getUuid(), resume.getFullName()).execute();
             } catch (SQLException e) {
                 helper.processException(resume.getUuid(), e);
             }
-            try (PreparedStatement ps = conn.prepareStatement(INSERT_CONTACT)) {
-                for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
-                    helper.doStatement(ps, entry.getKey().name(), entry.getValue(), resume.getUuid());
-                    ps.addBatch();
-                }
-                ps.executeBatch();
-            } catch (SQLException e) {
-                throw new StorageException(e);
-            }
             return null;
         });
-
+        helper.connectAndQuery(INSERT_CONTACT, ps -> {
+            for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
+                helper.doStatement(ps, entry.getKey().name(), entry.getValue(), resume.getUuid());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            return null;
+        });
     }
 
     @Override
@@ -76,8 +73,8 @@ public class SqlStorage implements Storage {
                 }
                 Resume resume = new Resume(uuid, result.getString("full_name"));
                 do {
-                    final ContactType contactType = ContactType.valueOf(result.getString("type"));
-                    final String contact = result.getString("value");
+                    ContactType contactType = ContactType.valueOf(result.getString("type"));
+                    String contact = result.getString("value");
                     resume.addContact(contactType, contact);
                 } while (result.next());
                 return resume;
@@ -88,33 +85,26 @@ public class SqlStorage implements Storage {
     @Override
     public void update(Resume resume) {
         LOG.info("Update " + resume);
-        helper.transactionalExecute(conn -> {
-            try (PreparedStatement ps = conn.prepareStatement(UPDATE_RESUME)) {
-                PreparedStatement finalStatement = helper.doStatement(ps, resume.getFullName(), resume.getUuid());
-                executeStatement(finalStatement, resume.getUuid());
-            } catch (SQLException e) {
-                throw new StorageException(e);
-            }
-            try (PreparedStatement ps = conn.prepareStatement(UPDATE_CONTACTS)) {
-                for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
-                    PreparedStatement prep = helper.doStatement(ps, entry.getValue(), entry.getKey().name(), resume.getUuid());
-                    prep.addBatch();
-                }
-                ps.executeBatch();
-            } catch (SQLException e) {
-                throw new StorageException(e);
-            }
+        helper.connectAndQuery(UPDATE_RESUME, ps -> {
+            PreparedStatement finalStatement = helper.doStatement(ps, resume.getFullName(), resume.getUuid());
+            executeStatement(finalStatement, resume.getUuid());
             return null;
         });
-
+        helper.connectAndQuery(UPDATE_CONTACTS, ps -> {
+            for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
+                PreparedStatement prep = helper.doStatement(ps, entry.getValue(), entry.getKey().name(), resume.getUuid());
+                prep.addBatch();
+            }
+            ps.executeBatch();
+            return null;
+        });
     }
 
     @Override
     public void delete(String uuid) {
         LOG.info("Delete " + uuid);
         helper.connectAndQuery(DELETE_RESUME, ps -> {
-            PreparedStatement preparedStatement = helper.doStatement(ps, uuid);
-            executeStatement(preparedStatement, uuid);
+            executeStatement(helper.doStatement(ps, uuid), uuid);
             return null;
         });
     }
@@ -123,10 +113,9 @@ public class SqlStorage implements Storage {
     public List<Resume> getAllSorted() {
         List<Resume> resumes = helper.connectAndQuery(SELECT_RESUMES, ps -> {
             List<Resume> list = new ArrayList<>();
-            try (ResultSet result = ps.executeQuery()) {
-                while (result.next()) {
-                    list.add(new Resume(result.getString("uuid").trim()
-                            , result.getString("full_name")));
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    list.add(new Resume(res.getString("uuid").trim(), res.getString("full_name")));
                 }
             }
             return list;
@@ -134,10 +123,10 @@ public class SqlStorage implements Storage {
         for (Resume resume : resumes) {
             helper.connectAndQuery(SELECT_CONTACT, ps -> {
                 helper.doStatement(ps, resume.getUuid());
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    while (resultSet.next()) {
-                        resume.addContact(ContactType.valueOf(resultSet.getString("type")),
-                                resultSet.getString("value"));
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
+                        resume.addContact(ContactType.valueOf(res.getString("type")),
+                                res.getString("value"));
                     }
                 }
                 return null;
@@ -149,8 +138,8 @@ public class SqlStorage implements Storage {
     @Override
     public int size() {
         return helper.connectAndQuery(COUNT_RESUMES, ps -> {
-            try (ResultSet selectCount = ps.executeQuery()) {
-                return selectCount.next() ? selectCount.getInt("COUNT") : 0;
+            try (ResultSet res = ps.executeQuery()) {
+                return res.next() ? res.getInt("COUNT") : 0;
             }
         });
     }

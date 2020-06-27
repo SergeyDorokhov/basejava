@@ -3,8 +3,6 @@ package ru.topjava.basejava.util;
 import ru.topjava.basejava.Exception.ExistStorageException;
 import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.sql.ConnectionFactory;
-import ru.topjava.basejava.sql.Query;
-import ru.topjava.basejava.sql.SqlTransaction;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,26 +15,21 @@ public class SqlHelper {
         this.connectionFactory = connectionFactory;
     }
 
-    public <T> T transactionalExecute(SqlTransaction<T> executor) {
+    public interface Query<T> {
+        T execute(PreparedStatement preparedStatement) throws SQLException;
+    }
+
+    public <T> T connectAndQuery(String sql, Query<T> query) {
         try (Connection connection = connectionFactory.getConnection()) {
-            try {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 connection.setAutoCommit(false);
-                T result = executor.execute(connection);
+                T result = query.execute(ps);
                 connection.commit();
                 return result;
             } catch (SQLException e) {
                 connection.rollback();
                 throw new StorageException(e);
             }
-        } catch (SQLException e) {
-            throw new StorageException(e);
-        }
-    }
-
-    public <T> T connectAndQuery(String sql, Query<T> query) {
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-            return query.execute(ps);
         } catch (SQLException e) {
             throw new StorageException(e);
         }
