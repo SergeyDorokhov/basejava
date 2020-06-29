@@ -14,6 +14,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static ru.topjava.basejava.model.ContactType.PHONE;
+import static ru.topjava.basejava.model.ContactType.SITE;
 
 public abstract class AbstractStorageTest {
     protected static final String STORAGE_DIRECTORY = Config.get().getProperties().getProperty("storage.dir");
@@ -69,6 +71,8 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void updateExistResumeTest() {
+        RESUME_WITH_SAME_UUID.addContact(PHONE, "+777777777");
+        RESUME_WITH_SAME_UUID.addContact(SITE, "www.mysite.com");
         storage.update(RESUME_WITH_SAME_UUID);
         assertEquals(RESUME_WITH_SAME_UUID, storage.get(RESUME_WITH_SAME_UUID.getUuid()));
     }
