@@ -24,6 +24,8 @@ public class SqlStorage implements Storage {
     private static final String COUNT_RESUMES = "SELECT COUNT(*) from resume";
     private static final String SELECT_RESUMES_WITH_CONTACTS = "SELECT * FROM resume r \n" +
             "LEFT JOIN contact c ON r.uuid = c.resume_uuid ORDER BY full_name, uuid";
+    private static final String SELECT_RESUMES = "SELECT * FROM resume ORDER BY full_name, uuid";
+    private static final String SELECT_CONTACT = "SELECT * FROM contact WHERE resume_uuid = ?";
 
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
         helper = new SqlHelper(() -> DriverManager.getConnection(dbUrl, dbUser, dbPassword));
@@ -93,14 +95,21 @@ public class SqlStorage implements Storage {
 
     @Override
     public List<Resume> getAllSorted() {
-        return helper.connectAndQuery(SELECT_RESUMES_WITH_CONTACTS, ps -> {
+        return helper.executeTransaction(conn -> {
             Map<String, Resume> map = new LinkedHashMap<>();
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    String uuid = res.getString("uuid").trim();
-                    String name = res.getString("full_name");
-                    Resume resume = map.computeIfAbsent(uuid, k -> new Resume(uuid, name));
-                    addContact(res, resume);
+            try (PreparedStatement selectResumes = conn.prepareStatement(SELECT_RESUMES)) {
+                ResultSet resumes = selectResumes.executeQuery();
+                while (resumes.next()) {
+                    String uuid = resumes.getString("uuid").trim();
+                    Resume resume = new Resume(uuid, resumes.getString("full_name"));
+                    try (PreparedStatement selectContact = conn.prepareStatement(SELECT_CONTACT)) {
+                        helper.setParam(selectContact, uuid);
+                        ResultSet contacts = selectContact.executeQuery();
+                        while (contacts.next()) {
+                            addContact(contacts, resume);
+                        }
+                        map.put(uuid, resume);
+                    }
                 }
             }
             return new ArrayList<>(map.values());
