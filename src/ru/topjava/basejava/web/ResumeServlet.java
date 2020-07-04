@@ -28,9 +28,9 @@ public class ResumeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         setParams(request, response);
-        fillStorage(storage);
+        fillStorage();
         printHeader(response);
-        printBody(response, storage);
+        printBody(response);
         printFooter(response);
     }
 
@@ -40,7 +40,7 @@ public class ResumeServlet extends HttpServlet {
         response.setHeader("Content-Type", "text/html; charset=UTF-8");
     }
 
-    private void fillStorage(Storage storage) {
+    private void fillStorage() {
         storage.clear();
         storage.save(new Resume("uuid1", "Ivan Ivanov"));
         storage.save(new Resume("uuid2", "Petr Petrov"));
@@ -57,7 +57,7 @@ public class ResumeServlet extends HttpServlet {
                 "</tr>");
     }
 
-    private void printBody(HttpServletResponse response, Storage storage) throws IOException {
+    private void printBody(HttpServletResponse response) throws IOException {
         List<Resume> resumes = storage.getAllSorted();
         for (Resume resume : resumes) {
             response.getWriter().write("<tr>" +
