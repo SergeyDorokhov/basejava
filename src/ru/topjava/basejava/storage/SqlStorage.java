@@ -1,6 +1,7 @@
 package ru.topjava.basejava.storage;
 
 import ru.topjava.basejava.Exception.NotExistStorageException;
+import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.*;
 import ru.topjava.basejava.util.SqlHelper;
 
@@ -28,6 +29,11 @@ public class SqlStorage implements Storage {
     private static final String SELECT_SECTION = "SELECT * FROM section WHERE resume_uuid = ?";
 
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new StorageException(e);
+        }
         helper = new SqlHelper(() -> DriverManager.getConnection(dbUrl, dbUser, dbPassword));
     }
 
