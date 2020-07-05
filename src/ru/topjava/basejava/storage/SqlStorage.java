@@ -7,13 +7,14 @@ import ru.topjava.basejava.util.SqlHelper;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class SqlStorage implements Storage {
     private final SqlHelper helper;
+    private final List<String> qualifications = new ArrayList<>();
+    private final List<String> achievements = new ArrayList<>();
     private static final Logger LOG = Logger.getLogger(AbstractStorage.class.getName());
     private static final String INSERT_RESUME = "INSERT INTO resume (uuid, full_name) VALUES (?,?)";
     private static final String SELECT_RESUME = "SELECT * FROM resume r LEFT JOIN contact c " +
@@ -23,10 +24,10 @@ public class SqlStorage implements Storage {
     private static final String DELETE_RESUMES = "DELETE FROM resume";
     private static final String UPDATE_RESUME = "UPDATE resume SET full_name = ? WHERE uuid=?";
     private static final String COUNT_RESUMES = "SELECT COUNT(*) from resume";
-    /*    private static final String SELECT_RESUMES_WITH_CONTACTS = "SELECT * FROM resume r \n" +
-                "LEFT JOIN contact c ON r.uuid = c.resume_uuid ORDER BY full_name, uuid";*/
     private static final String SELECT_CONTACT = "SELECT * FROM contact WHERE resume_uuid = ?";
+    private static final String DELETE_CONTACTS = "DELETE FROM contact where resume_uuid =?";
     private static final String SELECT_SECTION = "SELECT * FROM section WHERE resume_uuid = ?";
+    private static final String DELETE_SECTIONS = "DELETE FROM section where resume_uuid =?";
 
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
         try {
@@ -71,8 +72,9 @@ public class SqlStorage implements Storage {
                 Resume resume = new Resume(uuid, result.getString("full_name"));
                 do {
                     addContact(result, resume);
-                    addSection(result, resume);
+                    fillSection(result, resume);
                 } while (result.next());
+                addSections(resume);
                 return resume;
             }
         });
@@ -86,8 +88,8 @@ public class SqlStorage implements Storage {
                 helper.setParam(ps, resume.getFullName(), resume.getUuid());
                 helper.executeStatement(ps, resume.getUuid());
             }
-            deleteAttributes(conn, resume, "contact");
-            deleteAttributes(conn, resume, "section");
+            deleteAttribute(conn, resume, DELETE_CONTACTS);
+            deleteAttribute(conn, resume, DELETE_SECTIONS);
             saveContacts(conn, resume);
             saveSections(conn, resume);
             return null;
@@ -114,6 +116,7 @@ public class SqlStorage implements Storage {
                     Resume resume = new Resume(uuid, res.getString("full_name"));
                     addAttribute(conn, SELECT_CONTACT, resume);
                     addAttribute(conn, SELECT_SECTION, resume);
+                    addSections(resume);
                     resumes.add(resume);
                 }
             }
@@ -140,7 +143,7 @@ public class SqlStorage implements Storage {
                         addContact(res, resume);
                         break;
                     case SELECT_SECTION:
-                        addSection(res, resume);
+                        fillSection(res, resume);
                 }
             }
         }
@@ -154,27 +157,39 @@ public class SqlStorage implements Storage {
         }
     }
 
-    private void addSection(ResultSet result, Resume resume) throws SQLException {
-        String typeSection = result.getString("type_section");
-        SectionType sectionType;
-        if (typeSection != null && !(resume.getSections().containsKey(sectionType = SectionType.valueOf(typeSection)))) {
-            String content = result.getString("value_section");
+    private void fillSection(ResultSet result, Resume resume) throws SQLException {
+        String value = result.getString("value_section");
+        if (value != null) {
+            SectionType sectionType = SectionType.valueOf(result.getString("type_section"));
             switch (sectionType) {
                 case PERSONAL:
                 case OBJECTIVE:
-                    resume.addSection(sectionType, new TextSection(content));
+                    if (!resume.getContacts().containsValue(value)) {
+                        resume.addSection(sectionType, new TextSection(value));
+                    }
                     break;
                 case QUALIFICATIONS:
-                case ACHIEVEMENT:
-                    String[] split = content.split("\n");
-                    for (int i = 1; i < split.length; i++) {
-                        split[i] = "\n" + split[i];
+                    if (!qualifications.contains(value)) {
+                        qualifications.add(value);
                     }
-                    resume.addSection(sectionType, new ListSection(Arrays.asList(split)));
+                    break;
+                case ACHIEVEMENT:
+                    if (!achievements.contains(value)) {
+                        achievements.add(value);
+                    }
                     break;
                 default:
                     break;
             }
+        }
+    }
+
+    private void addSections(Resume resume) {
+        if (achievements.size() != 0) {
+            resume.addSection(SectionType.ACHIEVEMENT, new ListSection(achievements));
+        }
+        if (qualifications.size() != 0) {
+            resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
         }
     }
 
@@ -193,15 +208,31 @@ public class SqlStorage implements Storage {
         try (PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO section (value_section, type_section, resume_uuid) VALUES (?,?,?)")) {
             for (Map.Entry<SectionType, AbstractSection> entry : resume.getSections().entrySet()) {
-                helper.setParam(ps, String.valueOf(entry.getValue()), entry.getKey().name(), resume.getUuid());
-                ps.addBatch();
+                SectionType sectionType = entry.getKey();
+                switch (sectionType) {
+                    case OBJECTIVE:
+                    case PERSONAL:
+                        helper.setParam(ps, ((TextSection) entry.getValue()).getData(), entry.getKey().name(), resume.getUuid());
+                        ps.addBatch();
+                        break;
+                    case ACHIEVEMENT:
+                    case QUALIFICATIONS:
+                        List<String> records = ((ListSection) entry.getValue()).getData();
+                        for (String record : records) {
+                            helper.setParam(ps, record, entry.getKey().name(), resume.getUuid());
+                            ps.addBatch();
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             ps.executeBatch();
         }
     }
 
-    public void deleteAttributes(Connection conn, Resume resume, String tableName) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM " + tableName + " where resume_uuid = ?")) {
+    public void deleteAttribute(Connection conn, Resume resume, String sql) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             helper.setParam(ps, resume.getUuid());
             ps.execute();
         }
