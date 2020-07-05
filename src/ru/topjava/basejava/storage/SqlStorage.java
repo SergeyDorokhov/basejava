@@ -86,7 +86,8 @@ public class SqlStorage implements Storage {
                 helper.setParam(ps, resume.getFullName(), resume.getUuid());
                 helper.executeStatement(ps, resume.getUuid());
             }
-            deleteAttributes(conn, resume);
+            deleteAttributes(conn, resume, "contact");
+            deleteAttributes(conn, resume, "section");
             saveContacts(conn, resume);
             saveSections(conn, resume);
             return null;
@@ -199,10 +200,9 @@ public class SqlStorage implements Storage {
         }
     }
 
-    public void deleteAttributes(Connection conn, Resume resume) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM contact where resume_uuid = ?;" +
-                "DELETE FROM section where resume_uuid = ?")) {
-            helper.setParam(ps, resume.getUuid(), resume.getUuid());
+    public void deleteAttributes(Connection conn, Resume resume, String tableName) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM " + tableName + " where resume_uuid = ?")) {
+            helper.setParam(ps, resume.getUuid());
             ps.execute();
         }
     }
