@@ -7,6 +7,7 @@ import ru.topjava.basejava.util.SqlHelper;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -74,7 +75,7 @@ public class SqlStorage implements Storage {
                     addContact(result, resume);
                     fillSection(result, resume);
                 } while (result.next());
-                addSections(resume);
+                //addSections(resume);
                 return resume;
             }
         });
@@ -116,7 +117,7 @@ public class SqlStorage implements Storage {
                     Resume resume = new Resume(uuid, res.getString("full_name"));
                     addAttribute(conn, SELECT_CONTACT, resume);
                     addAttribute(conn, SELECT_SECTION, resume);
-                    addSections(resume);
+                    //addSections(resume);
                     resumes.add(resume);
                 }
             }
@@ -164,11 +165,21 @@ public class SqlStorage implements Storage {
             switch (sectionType) {
                 case PERSONAL:
                 case OBJECTIVE:
-                    if (!resume.getContacts().containsValue(value)) {
+                    //if (!resume.getContacts().containsValue(value)) {
                         resume.addSection(sectionType, new TextSection(value));
-                    }
+                    //}
                     break;
                 case QUALIFICATIONS:
+                case ACHIEVEMENT:
+                    String[] split = value.split("\n");
+                 /*   for (int i = 0; i < split.length; i++) {
+                        split[i] = "\n" + split[i];
+                    }*/
+                    resume.addSection(sectionType, new ListSection(Arrays.asList(split)));
+                    //qualifications.add(value);
+                    break;
+
+               /* case QUALIFICATIONS:
                     if (!qualifications.contains(value)) {
                         qualifications.add(value);
                     }
@@ -177,21 +188,21 @@ public class SqlStorage implements Storage {
                     if (!achievements.contains(value)) {
                         achievements.add(value);
                     }
-                    break;
+                    break;*/
                 default:
                     break;
             }
         }
     }
 
-    private void addSections(Resume resume) {
+/*    private void addSections(Resume resume) {
         if (achievements.size() != 0) {
             resume.addSection(SectionType.ACHIEVEMENT, new ListSection(achievements));
         }
         if (qualifications.size() != 0) {
             resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
         }
-    }
+    }*/
 
     public void saveContacts(Connection conn, Resume resume) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (value, type, resume_uuid)" +
@@ -218,10 +229,13 @@ public class SqlStorage implements Storage {
                     case ACHIEVEMENT:
                     case QUALIFICATIONS:
                         List<String> records = ((ListSection) entry.getValue()).getData();
+                        StringBuilder builder = new StringBuilder();
                         for (String record : records) {
-                            helper.setParam(ps, record, entry.getKey().name(), resume.getUuid());
-                            ps.addBatch();
+                            builder.append(record).append("\n");
                         }
+                        //helper.setParam(ps, String.valueOf(entry.getValue()), entry.getKey().name(), resume.getUuid());
+                        helper.setParam(ps, builder.toString(), entry.getKey().name(), resume.getUuid());
+                        ps.addBatch();
                         break;
                     default:
                         break;
