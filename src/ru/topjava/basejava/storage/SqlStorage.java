@@ -6,10 +6,7 @@ import ru.topjava.basejava.model.*;
 import ru.topjava.basejava.util.SqlHelper;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class SqlStorage implements Storage {
@@ -29,6 +26,9 @@ public class SqlStorage implements Storage {
     private static final String DELETE_CONTACTS = "DELETE FROM contact where resume_uuid =?";
     private static final String SELECT_SECTION = "SELECT * FROM section WHERE resume_uuid = ?";
     private static final String DELETE_SECTIONS = "DELETE FROM section where resume_uuid =?";
+    private static final String SELECT_RESUMES_WITH_ATTRIBUTES = "SELECT * FROM resume r LEFT JOIN contact c " +
+            "ON r.uuid = c.resume_uuid LEFT JOIN section s " +
+            "ON r.uuid = s.resume_uuid ORDER BY full_name, uuid";
 
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
         try {
@@ -109,6 +109,22 @@ public class SqlStorage implements Storage {
     @Override
     public List<Resume> getAllSorted() {
         return helper.executeTransaction(conn -> {
+            Map<String, Resume> map = new LinkedHashMap<>();
+            try (PreparedStatement ps = conn.prepareStatement(SELECT_RESUMES_WITH_ATTRIBUTES)) {
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
+                        String uuid = res.getString("uuid").trim();
+                        String name = res.getString("full_name");
+                        Resume resume = map.computeIfAbsent(uuid, k -> new Resume(uuid, name));
+                        addContact(res, resume);
+                        fillSection(res, resume);
+                    }
+                }
+            }
+            return new ArrayList<>(map.values());
+        });
+    }
+     /*   return helper.executeTransaction(conn -> {
             ArrayList<Resume> resumes = new ArrayList<>();
             try (PreparedStatement selectResumes = conn.prepareStatement(SELECT_RESUMES)) {
                 ResultSet res = selectResumes.executeQuery();
@@ -122,8 +138,7 @@ public class SqlStorage implements Storage {
                 }
             }
             return resumes;
-        });
-    }
+        });*/
 
     @Override
     public int size() {
@@ -166,7 +181,7 @@ public class SqlStorage implements Storage {
                 case PERSONAL:
                 case OBJECTIVE:
                     //if (!resume.getContacts().containsValue(value)) {
-                        resume.addSection(sectionType, new TextSection(value));
+                    resume.addSection(sectionType, new TextSection(value));
                     //}
                     break;
                 case QUALIFICATIONS:
