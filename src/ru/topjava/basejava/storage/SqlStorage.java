@@ -11,8 +11,6 @@ import java.util.logging.Logger;
 
 public class SqlStorage implements Storage {
     private final SqlHelper helper;
-    private final List<String> qualifications = new ArrayList<>();
-    private final List<String> achievements = new ArrayList<>();
     private static final Logger LOG = Logger.getLogger(AbstractStorage.class.getName());
     private static final String INSERT_RESUME = "INSERT INTO resume (uuid, full_name) VALUES (?,?)";
     private static final String SELECT_RESUME = "SELECT * FROM resume r LEFT JOIN contact c " +
@@ -55,8 +53,8 @@ public class SqlStorage implements Storage {
                 helper.setParam(ps, resume.getUuid(), resume.getFullName());
                 ps.execute();
             }
-            saveContacts(conn, resume);
-            saveSections(conn, resume);
+            insertContactsDB(conn, resume);
+            insertSectionsDB(conn, resume);
             return null;
         });
     }
@@ -73,9 +71,8 @@ public class SqlStorage implements Storage {
                 Resume resume = new Resume(uuid, result.getString("full_name"));
                 do {
                     addContact(result, resume);
-                    fillSection(result, resume);
+                    addSection(result, resume);
                 } while (result.next());
-                //addSections(resume);
                 return resume;
             }
         });
@@ -91,8 +88,8 @@ public class SqlStorage implements Storage {
             }
             deleteAttribute(conn, resume, DELETE_CONTACTS);
             deleteAttribute(conn, resume, DELETE_SECTIONS);
-            saveContacts(conn, resume);
-            saveSections(conn, resume);
+            insertContactsDB(conn, resume);
+            insertSectionsDB(conn, resume);
             return null;
         });
     }
@@ -117,28 +114,13 @@ public class SqlStorage implements Storage {
                         String name = res.getString("full_name");
                         Resume resume = map.computeIfAbsent(uuid, k -> new Resume(uuid, name));
                         addContact(res, resume);
-                        fillSection(res, resume);
+                        addSection(res, resume);
                     }
                 }
             }
             return new ArrayList<>(map.values());
         });
     }
-     /*   return helper.executeTransaction(conn -> {
-            ArrayList<Resume> resumes = new ArrayList<>();
-            try (PreparedStatement selectResumes = conn.prepareStatement(SELECT_RESUMES)) {
-                ResultSet res = selectResumes.executeQuery();
-                while (res.next()) {
-                    String uuid = res.getString("uuid").trim();
-                    Resume resume = new Resume(uuid, res.getString("full_name"));
-                    addAttribute(conn, SELECT_CONTACT, resume);
-                    addAttribute(conn, SELECT_SECTION, resume);
-                    //addSections(resume);
-                    resumes.add(resume);
-                }
-            }
-            return resumes;
-        });*/
 
     @Override
     public int size() {
@@ -149,22 +131,6 @@ public class SqlStorage implements Storage {
         });
     }
 
-    private void addAttribute(Connection conn, String sql, Resume resume) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            helper.setParam(ps, resume.getUuid());
-            ResultSet res = ps.executeQuery();
-            while (res.next()) {
-                switch (sql) {
-                    case SELECT_CONTACT:
-                        addContact(res, resume);
-                        break;
-                    case SELECT_SECTION:
-                        fillSection(res, resume);
-                }
-            }
-        }
-    }
-
     public void addContact(ResultSet result, Resume resume) throws SQLException {
         String contact = result.getString("value");
         if (contact != null && !resume.getContacts().containsValue(contact)) {
@@ -173,53 +139,27 @@ public class SqlStorage implements Storage {
         }
     }
 
-    private void fillSection(ResultSet result, Resume resume) throws SQLException {
+    private void addSection(ResultSet result, Resume resume) throws SQLException {
         String value = result.getString("value_section");
         if (value != null) {
             SectionType sectionType = SectionType.valueOf(result.getString("type_section"));
             switch (sectionType) {
                 case PERSONAL:
                 case OBJECTIVE:
-                    //if (!resume.getContacts().containsValue(value)) {
                     resume.addSection(sectionType, new TextSection(value));
-                    //}
                     break;
                 case QUALIFICATIONS:
                 case ACHIEVEMENT:
                     String[] split = value.split("\n");
-                 /*   for (int i = 0; i < split.length; i++) {
-                        split[i] = "\n" + split[i];
-                    }*/
                     resume.addSection(sectionType, new ListSection(Arrays.asList(split)));
-                    //qualifications.add(value);
                     break;
-
-               /* case QUALIFICATIONS:
-                    if (!qualifications.contains(value)) {
-                        qualifications.add(value);
-                    }
-                    break;
-                case ACHIEVEMENT:
-                    if (!achievements.contains(value)) {
-                        achievements.add(value);
-                    }
-                    break;*/
                 default:
                     break;
             }
         }
     }
 
-/*    private void addSections(Resume resume) {
-        if (achievements.size() != 0) {
-            resume.addSection(SectionType.ACHIEVEMENT, new ListSection(achievements));
-        }
-        if (qualifications.size() != 0) {
-            resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
-        }
-    }*/
-
-    public void saveContacts(Connection conn, Resume resume) throws SQLException {
+    public void insertContactsDB(Connection conn, Resume resume) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (value, type, resume_uuid)" +
                 "VALUES (?,?,?)")) {
             for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
@@ -230,7 +170,7 @@ public class SqlStorage implements Storage {
         }
     }
 
-    private void saveSections(Connection conn, Resume resume) throws SQLException {
+    private void insertSectionsDB(Connection conn, Resume resume) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO section (value_section, type_section, resume_uuid) VALUES (?,?,?)")) {
             for (Map.Entry<SectionType, AbstractSection> entry : resume.getSections().entrySet()) {
@@ -248,7 +188,6 @@ public class SqlStorage implements Storage {
                         for (String record : records) {
                             builder.append(record).append("\n");
                         }
-                        //helper.setParam(ps, String.valueOf(entry.getValue()), entry.getKey().name(), resume.getUuid());
                         helper.setParam(ps, builder.toString(), entry.getKey().name(), resume.getUuid());
                         ps.addBatch();
                         break;
