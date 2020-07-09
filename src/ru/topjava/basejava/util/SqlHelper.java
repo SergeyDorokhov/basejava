@@ -1,8 +1,8 @@
 package ru.topjava.basejava.util;
 
-import ru.topjava.basejava.Exception.ExistStorageException;
-import ru.topjava.basejava.Exception.NotExistStorageException;
-import ru.topjava.basejava.Exception.StorageException;
+import ru.topjava.basejava.exception.ExistStorageException;
+import ru.topjava.basejava.exception.NotExistStorageException;
+import ru.topjava.basejava.exception.StorageException;
 import ru.topjava.basejava.sql.ConnectionFactory;
 
 import java.sql.Connection;

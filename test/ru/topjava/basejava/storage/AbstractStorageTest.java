@@ -3,8 +3,8 @@ package ru.topjava.basejava.storage;
 import org.junit.Before;
 import org.junit.Test;
 import ru.topjava.basejava.Config;
-import ru.topjava.basejava.Exception.ExistStorageException;
-import ru.topjava.basejava.Exception.NotExistStorageException;
+import ru.topjava.basejava.exception.ExistStorageException;
+import ru.topjava.basejava.exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.model.ResumeTestData;
 
@@ -48,10 +48,9 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void saveNewResumeTest() {
-        storage.clear();
-        storage.save(RESUME_1);
-        assertEquals(1, storage.size());
-        assertEquals(RESUME_1, storage.get(RESUME_1.getUuid()));
+        storage.save(RESUME_KISLIN);
+        assertEquals(4, storage.size());
+        assertEquals(RESUME_KISLIN, storage.get(RESUME_KISLIN.getUuid()));
     }
 
     @Test(expected = ExistStorageException.class)

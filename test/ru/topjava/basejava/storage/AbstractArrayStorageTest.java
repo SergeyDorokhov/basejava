@@ -1,7 +1,7 @@
 package ru.topjava.basejava.storage;
 
 import org.junit.Test;
-import ru.topjava.basejava.Exception.StorageException;
+import ru.topjava.basejava.exception.StorageException;
 import ru.topjava.basejava.model.Resume;
 
 import static org.junit.Assert.fail;
