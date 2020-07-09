@@ -1,7 +1,7 @@
 package ru.topjava.basejava.storage;
 
-import ru.topjava.basejava.exception.NotExistStorageException;
-import ru.topjava.basejava.exception.StorageException;
+import ru.topjava.basejava.Exception.NotExistStorageException;
+import ru.topjava.basejava.Exception.StorageException;
 import ru.topjava.basejava.model.*;
 import ru.topjava.basejava.util.SqlHelper;
 

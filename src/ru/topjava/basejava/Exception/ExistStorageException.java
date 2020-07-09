@@ -1,4 +1,4 @@
-package ru.topjava.basejava.exception;
+package ru.topjava.basejava.Exception;
 
 public class ExistStorageException extends StorageException {
     public ExistStorageException(String uuid) {

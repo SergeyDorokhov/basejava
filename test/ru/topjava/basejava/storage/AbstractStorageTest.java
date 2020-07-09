@@ -3,8 +3,8 @@ package ru.topjava.basejava.storage;
 import org.junit.Before;
 import org.junit.Test;
 import ru.topjava.basejava.Config;
-import ru.topjava.basejava.exception.ExistStorageException;
-import ru.topjava.basejava.exception.NotExistStorageException;
+import ru.topjava.basejava.Exception.ExistStorageException;
+import ru.topjava.basejava.Exception.NotExistStorageException;
 import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.model.ResumeTestData;
 

@@ -1,4 +1,4 @@
-package ru.topjava.basejava.exception;
+package ru.topjava.basejava.Exception;
 
 public class StorageException extends RuntimeException {
     private final String uuid;
