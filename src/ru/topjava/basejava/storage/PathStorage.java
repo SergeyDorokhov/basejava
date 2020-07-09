@@ -1,6 +1,6 @@
 package ru.topjava.basejava.storage;
 
-import ru.topjava.basejava.Exception.StorageException;
+import ru.topjava.basejava.exception.StorageException;
 import ru.topjava.basejava.model.Resume;
 import ru.topjava.basejava.storage.serializer.SerializationStrategy;
 
