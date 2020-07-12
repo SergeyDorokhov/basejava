@@ -1,3 +1,5 @@
+<%@ page import="ru.topjava.basejava.model.ListSection" %>
+<%@ page import="ru.topjava.basejava.model.TextSection" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
@@ -17,31 +19,31 @@
                          type="java.util.Map.Entry<ru.topjava.basejava.model.ContactType, java.lang.String>"/>
                 <%=contactEntry.getKey().toHtml(contactEntry.getValue())%><br/>
         </c:forEach>
-    <p>
-
-
-    <p>
+        <br>
         <c:forEach var="sectionEntry" items="${resume.sections}">
             <jsp:useBean id="sectionEntry"
                          type="java.util.Map.Entry<ru.topjava.basejava.model.SectionType
                          , ru.topjava.basejava.model.AbstractSection>"/>
+
             <c:set var="sectionType" value="${sectionEntry.key}"/>
+        <strong><%=sectionEntry.getKey().getTitle()%>
+        </strong><br/>
             <c:set var="sectionValue" value="${sectionEntry.value}"/>
+            <jsp:useBean id="sectionValue" type="ru.topjava.basejava.model.AbstractSection"/>
         <c:choose>
         <c:when test="${sectionType=='OBJECTIVE' || sectionType=='PERSONAL'}">
-                <%=sectionEntry.getKey().getTitle()%><br/>
-                <%=sectionEntry.getValue()%><br/><br/>
+                <%=((TextSection)sectionValue).getData()%><br/><br/>
         </c:when>
-        <c:when test="${sectionType=='QUALIFICATIONS' || type=='ACHIEVEMENT'}">
-        <c:forEach var="sectionEntry" items="${resume.sections}">
+        <c:when test="${sectionType=='QUALIFICATIONS' || sectionType=='ACHIEVEMENT'}">
+        <c:forEach var="item" items="<%=((ListSection) sectionValue).getData()%>">
 
+            ${item}<br><br/>
         </c:forEach>
         </c:when>
         </c:choose>
 
         </c:forEach>
     <p>
-
 </section>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
