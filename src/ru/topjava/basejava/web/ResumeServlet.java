@@ -76,8 +76,24 @@ public class ResumeServlet extends HttpServlet {
                 response.sendRedirect("resume");
                 return;
             case "view":
+                resume = storage.get(uuid);
             case "edit":
                 resume = storage.get(uuid);
+                for (SectionType sectionType : SectionType.values()) {
+                    AbstractSection section = resume.getSections().get(sectionType);
+                    if (section == null) {
+                        switch (sectionType) {
+                            case PERSONAL:
+                            case OBJECTIVE:
+                                section = new TextSection("");
+                                break;
+                            case ACHIEVEMENT:
+                            case QUALIFICATIONS:
+                                section = new ListSection("");
+                        }
+                    }
+                    resume.addSection(sectionType, section);
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Action " + action + " is illegal");

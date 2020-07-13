@@ -1,5 +1,6 @@
 package ru.topjava.basejava.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ListSection extends AbstractSection {
@@ -7,6 +8,10 @@ public class ListSection extends AbstractSection {
     private List<String> data;
 
     public ListSection() {
+    }
+
+    public ListSection(String... strings) {
+        this(Arrays.asList(strings));
     }
 
     public ListSection(List<String> data) {
