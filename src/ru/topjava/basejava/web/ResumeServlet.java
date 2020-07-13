@@ -39,8 +39,7 @@ public class ResumeServlet extends HttpServlet {
         }
         for (SectionType sectionType : SectionType.values()) {
             String value = request.getParameter(sectionType.name());
-            if (value == null) {
-            } else {
+            if (value != null && value.trim().length() != 0) {
                 List<String> list = Arrays.asList(value.split("\n"));
                 switch (sectionType) {
                     case PERSONAL:
@@ -54,6 +53,8 @@ public class ResumeServlet extends HttpServlet {
                     default:
                         break;
                 }
+            } else {
+                resume.getSections().remove(sectionType);
             }
         }
         storage.update(resume);
@@ -64,6 +65,7 @@ public class ResumeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String uuid = request.getParameter("uuid");
         String action = request.getParameter("action");
+        String fullName = request.getParameter("fullName");
         Resume resume;
         if (action == null) {
             request.setAttribute("resumes", storage.getAllSorted());
@@ -71,6 +73,30 @@ public class ResumeServlet extends HttpServlet {
             return;
         }
         switch (action) {
+            case "add":
+                resume = new Resume(fullName);
+                for (ContactType contactType : ContactType.values()) {
+                    resume.addContact(contactType, "");
+                }
+                for (SectionType sectionType : SectionType.values()) {
+                    switch (sectionType) {
+                        case PERSONAL:
+                        case OBJECTIVE:
+                            resume.addSection(sectionType, new TextSection(""));
+                            break;
+                        case ACHIEVEMENT:
+                        case QUALIFICATIONS:
+                            resume.addSection(sectionType, new ListSection(""));
+                            break;
+                        case EDUCATION:
+                        case EXPERIENCE:
+                            resume.addSection(sectionType, new ExperienceSection(new Experience(""
+                                    , "", new Experience.Position())));
+                    }
+                }
+                storage.save(resume);
+                response.sendRedirect("resume");
+                return;
             case "delete":
                 storage.delete(uuid);
                 response.sendRedirect("resume");
@@ -95,7 +121,7 @@ public class ResumeServlet extends HttpServlet {
                             case EDUCATION:
                             case EXPERIENCE:
                                 section = new ExperienceSection(new Experience(""
-                                        ,"",new Experience.Position()));
+                                        , "", new Experience.Position()));
                         }
                     }
                     resume.addSection(sectionType, section);
