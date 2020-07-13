@@ -1,26 +1,26 @@
 <%@ page import="ru.topjava.basejava.model.ContactType" %>
 <%@ page import="ru.topjava.basejava.model.ListSection" %>
 <%@ page import="ru.topjava.basejava.model.SectionType" %>
-<%@ page import="ru.topjava.basejava.model.TextSection" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="css/style.css">
-    <jsp:useBean id="resume" scope="request" type="ru.topjava.basejava.model.Resume"/>
+    <jsp:useBean id="resume" scope="request" class="ru.topjava.basejava.model.Resume"/>
     <title>Резюме ${resume.fullName}</title>
 </head>
 <body>
 <jsp:include page="fragments/header.jsp"/>
 <section>
+
     <form method="post" action="resume" enctype="application/x-www-form-urlencoded">
         <input type="hidden" name="uuid" value="${resume.uuid}">
         <dl>
             <dt>Имя:</dt>
             <dd><input type="text" name="fullName" size=50 value="${resume.fullName}"></dd>
         </dl>
-        <h3>Контакты:</h3>
+        <p><strong>Контакты</strong></p>
         <c:forEach var="type" items="<%=ContactType.values()%>">
             <dl>
                 <dt>${type.title}</dt>
@@ -28,32 +28,24 @@
                 <dd><input type="text" name="${type.name()}" size=30 value="${resume.contacts.get(type)}"></dd>
             </dl>
         </c:forEach>
-        <h3>Секции:</h3>
-        <c:forEach var="sectionType" items="<%=SectionType.values()%>">
-        <%--    <jsp:useBean id="sectionType" type="ru.topjava.basejava.model.SectionType"/>
-            <c:set var="sectionValue" value="${resume.getSections().get(sectionType)}"/>--%>
-         <%--   <jsp:useBean id="sectionValue" type="ru.topjava.basejava.model.AbstractSection"/>--%>
-            <dl>
-                <dt>${sectionType.title}</dt>
+        <c:forEach var="type" items="<%=SectionType.values()%>">
 
-                <c:choose>
+            <h2><a>${type.title}</a></h2>
+            <c:choose>
+                <c:when test="${type=='OBJECTIVE' || type=='PERSONAL'}">
+                    <input type='text' name='${type}' size=75 value="${resume.sections.get(type)}">
+                </c:when>
+                <c:when test="${type=='QUALIFICATIONS' || type=='ACHIEVEMENT'}">
+                    <c:set var="section" value="${resume.sections.get(type)}"/>
+                    <jsp:useBean id="section" scope="request" type="ru.topjava.basejava.model.AbstractSection"/>
 
-                    <c:when test="${sectionType=='OBJECTIVE' || sectionType=='PERSONAL'}">
-                        <c:set var="value" value="${resume.sections.get(sectionType)}"/>
-                        <jsp:useBean id="value" type="ru.topjava.basejava.model.AbstractSection"/>
-                        <textarea name='${sectionType}' cols=100
-                                  rows=4><%=String.join("\n", ((TextSection) value).getData())%></textarea>
+                    <textarea name='${type}' cols=75
+                              rows=4><%=String.join("\n", ((ListSection) section).getData())%></textarea>
 
-                    </c:when>
-                    <c:when test="${sectionType=='QUALIFICATIONS' || sectionType=='ACHIEVEMENT'}">
-                        <c:set var="sectionValue" value="${resume.sections.get(sectionType)}"/>
-                        <jsp:useBean id="sectionValue" type="ru.topjava.basejava.model.AbstractSection"/>
-                        <textarea name='${sectionType}' cols=100
-                                  rows=4><%=String.join("\n", ((ListSection) sectionValue).getData())%></textarea>
-                    </c:when>
-                </c:choose>
-            </dl>
+                </c:when>
+            </c:choose>
         </c:forEach>
+
         <hr>
         <button type="submit">Сохранить</button>
         <button onclick="window.history.back()">Отменить</button>

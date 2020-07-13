@@ -1,8 +1,7 @@
 package ru.topjava.basejava.web;
 
 import ru.topjava.basejava.Config;
-import ru.topjava.basejava.model.ContactType;
-import ru.topjava.basejava.model.Resume;
+import ru.topjava.basejava.model.*;
 import ru.topjava.basejava.storage.SqlStorage;
 import ru.topjava.basejava.storage.Storage;
 
@@ -11,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class ResumeServlet extends HttpServlet {
     private final Storage storage;
@@ -34,6 +35,25 @@ public class ResumeServlet extends HttpServlet {
                 resume.addContact(type, value);
             } else {
                 resume.getContacts().remove(type);
+            }
+        }
+        for (SectionType sectionType : SectionType.values()) {
+            String value = request.getParameter(sectionType.name());
+            if (value == null) {
+            } else {
+                List<String> list = Arrays.asList(value.split("\n"));
+                switch (sectionType) {
+                    case PERSONAL:
+                    case OBJECTIVE:
+                        resume.addSection(sectionType, new TextSection(value));
+                        break;
+                    case ACHIEVEMENT:
+                    case QUALIFICATIONS:
+                        resume.addSection(sectionType, new ListSection(list));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         storage.update(resume);
