@@ -1,5 +1,6 @@
 package ru.topjava.basejava.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ExperienceSection extends AbstractSection {
@@ -7,6 +8,10 @@ public class ExperienceSection extends AbstractSection {
     private List<Experience> experiences;
 
     public ExperienceSection() {
+    }
+
+    public ExperienceSection(Experience... experiences) {
+        this(Arrays.asList(experiences));
     }
 
     public ExperienceSection(List<Experience> experiences) {

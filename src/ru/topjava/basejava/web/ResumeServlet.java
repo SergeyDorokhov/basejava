@@ -77,6 +77,7 @@ public class ResumeServlet extends HttpServlet {
                 return;
             case "view":
                 resume = storage.get(uuid);
+                break;
             case "edit":
                 resume = storage.get(uuid);
                 for (SectionType sectionType : SectionType.values()) {
@@ -90,6 +91,11 @@ public class ResumeServlet extends HttpServlet {
                             case ACHIEVEMENT:
                             case QUALIFICATIONS:
                                 section = new ListSection("");
+                                break;
+                            case EDUCATION:
+                            case EXPERIENCE:
+                                section = new ExperienceSection(new Experience(""
+                                        ,"",new Experience.Position()));
                         }
                     }
                     resume.addSection(sectionType, section);
