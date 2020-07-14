@@ -14,9 +14,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ResumeServlet extends HttpServlet {
-    private final Storage storage;
+    private Storage storage;
 
-    public ResumeServlet() {
+    @Override
+    public void init() {
         this.storage = new SqlStorage(Config.get().getProperties().getProperty("db.url")
                 , Config.get().getProperties().getProperty("db.user")
                 , Config.get().getProperties().getProperty("db.password"));
@@ -40,7 +41,6 @@ public class ResumeServlet extends HttpServlet {
         for (SectionType sectionType : SectionType.values()) {
             String value = request.getParameter(sectionType.name());
             if (value != null && value.trim().length() != 0) {
-                List<String> list = Arrays.asList(value.split("\n"));
                 switch (sectionType) {
                     case PERSONAL:
                     case OBJECTIVE:
@@ -48,6 +48,7 @@ public class ResumeServlet extends HttpServlet {
                         break;
                     case ACHIEVEMENT:
                     case QUALIFICATIONS:
+                        List<String> list = Arrays.asList(value.split("\n"));
                         resume.addSection(sectionType, new ListSection(list));
                         break;
                     default:
@@ -95,8 +96,7 @@ public class ResumeServlet extends HttpServlet {
                     }
                 }
                 storage.save(resume);
-                response.sendRedirect("resume");
-                return;
+                break;
             case "delete":
                 storage.delete(uuid);
                 response.sendRedirect("resume");
