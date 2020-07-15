@@ -51,8 +51,31 @@ public class ResumeServlet extends HttpServlet {
                         List<String> list = Arrays.asList(value.split("\n"));
                         resume.addSection(sectionType, new ListSection(list));
                         break;
-                    default:
+                    case EXPERIENCE:
+                    case EDUCATION:
+                       /* List<Experience> orgs = new ArrayList<>();
+                        String[] urls = request.getParameterValues(type.name() + "url");
+                        for (int i = 0; i < values.length; i++) {
+                            String name = values[i];
+                            if (!HtmlUtil.isEmpty(name)) {
+                                List<Organization.Position> positions = new ArrayList<>();
+                                String pfx = type.name() + i;
+                                String[] startDates = request.getParameterValues(pfx + "startDate");
+                                String[] endDates = request.getParameterValues(pfx + "endDate");
+                                String[] titles = request.getParameterValues(pfx + "title");
+                                String[] descriptions = request.getParameterValues(pfx + "description");
+                                for (int j = 0; j < titles.length; j++) {
+                                    if (!HtmlUtil.isEmpty(titles[j])) {
+                                        positions.add(new Organization.Position(DateUtil.parse(startDates[j]), DateUtil.parse(endDates[j]), titles[j], descriptions[j]));
+                                    }
+                                }
+                                orgs.add(new Organization(new Link(name, urls[i]), positions));
+                            }
+                        }
+                        r.setSection(type, new OrganizationSection(orgs));
                         break;
+                    default:
+                        break;*/
                 }
             } else {
                 resume.getSections().remove(sectionType);
@@ -83,7 +106,7 @@ public class ResumeServlet extends HttpServlet {
                     AbstractSection section = getEmptySections(sectionType);
                     resume.addSection(sectionType, section);
                 }
-                storage.save(resume);
+               /* storage.save(resume);*/
                 break;
             case "delete":
                 storage.delete(uuid);

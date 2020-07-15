@@ -1,3 +1,4 @@
+<%@ page import="ru.topjava.basejava.model.ExperienceSection" %>
 <%@ page import="ru.topjava.basejava.model.ListSection" %>
 <%@ page import="ru.topjava.basejava.model.TextSection" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -37,6 +38,17 @@
         <c:when test="${sectionType=='QUALIFICATIONS' || sectionType=='ACHIEVEMENT'}">
         <c:forEach var="item" items="<%=((ListSection) sectionValue).getData()%>">
             ${item}<br><br/>
+        </c:forEach>
+        </c:when>
+        <c:when test="${sectionType=='EXPERIENCE' || sectionType=='EDUCATION'}">
+        <c:forEach var="experience" items="<%=((ExperienceSection) sectionValue).getExperiences()%>">
+            ${experience.employerName}
+        <c:forEach var="position" items="${experience.positions}">
+            <jsp:useBean id="position" type="ru.topjava.basejava.model.Experience.Position"/>
+            ${position.position}<br>
+            ${position.description}
+
+        </c:forEach>
         </c:forEach>
         </c:when>
         </c:choose>

@@ -1,6 +1,8 @@
 <%@ page import="ru.topjava.basejava.model.ContactType" %>
+<%@ page import="ru.topjava.basejava.model.ExperienceSection" %>
 <%@ page import="ru.topjava.basejava.model.ListSection" %>
 <%@ page import="ru.topjava.basejava.model.SectionType" %>
+<%@ page import="ru.topjava.basejava.util.DateUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
@@ -8,6 +10,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="css/style.css">
     <jsp:useBean id="resume" type="ru.topjava.basejava.model.Resume" scope="request"/>
+
     <title>Резюме ${resume.fullName}</title>
 </head>
 <body>
@@ -40,12 +43,40 @@
                               rows=4><%=String.join("\n", ((ListSection) section).getData())%></textarea>
                 </c:when>
                 <c:when test="${sectionType=='EDUCATION' || sectionType=='EXPERIENCE'}">
+                    <c:forEach var="experience" items="<%=((ExperienceSection) section).getExperiences()%>"
+                    >
+                        <p>Организация:</p>
+                        <p><input type="text" name='${sectionType}' size=100 value="${experience.employerName}"></p>
+                        <p>Сайт:</p>
+                        <p><input type="text" name='${sectionType}url' size=100 value="${experience.employerSite}"></p>
+                        <p>Период:</p>
+                        <c:forEach var="position" items="${experience.positions}">
+                            <jsp:useBean id="position" type="ru.topjava.basejava.model.Experience.Position"/>
+                            <p>с:
+                                <input type="text" name="${sectionType}startDate" size=10
+                                       value="<%=(DateUtil.format(position.getStartDate()))%>">
+                                по:
+                                <input type="text" name="${sectionType}finishDate" size=10
+                                       value="<%=(DateUtil.format(position.getFinishDate()))%>">
+                            </p>
+                            <p>Должность:</p>
+                            <input type="text" name='${sectionType}title' size=100 value="${position.position}">
+                            <p>Должностные обязанности:</p>
+                            <textarea name="${sectionType}$description" rows=4
+                                      cols=100>${position.description}</textarea>
+
+                        </c:forEach>
+                        </div>
+                    </c:forEach>
                 </c:when>
+
 
             </c:choose>
         </c:forEach>
-        <button type="submit">Сохранить</button>
-        <button onclick="window.history.back()">Отменить</button>
+        <p>
+            <button type="submit">Сохранить</button>
+            <button onclick="window.history.back()">Отменить</button>
+        </p>
     </form>
 </section>
 <jsp:include page="fragments/footer.jsp"/>
