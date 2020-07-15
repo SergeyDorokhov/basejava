@@ -12,8 +12,8 @@ public class ResumeTestData {
         resume.addSection(SectionType.PERSONAL, new TextSection(data.getPersonal()));
         resume.addSection(SectionType.ACHIEVEMENT, new ListSection(data.getAchievement()));
         resume.addSection(SectionType.QUALIFICATIONS, new ListSection(data.getQualification()));
-/*        resume.addSection(SectionType.EXPERIENCE, new ExperienceSection(data.getExperiences()));
-        resume.addSection(SectionType.EDUCATION, new ExperienceSection(data.getEducation()));*/
+        resume.addSection(SectionType.EXPERIENCE, new ExperienceSection(data.getExperiences()));
+        resume.addSection(SectionType.EDUCATION, new ExperienceSection(data.getEducation()));
         return resume;
     }
 

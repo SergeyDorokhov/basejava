@@ -2,11 +2,18 @@ package ru.topjava.basejava.storage;
 
 import ru.topjava.basejava.exception.NotExistStorageException;
 import ru.topjava.basejava.exception.StorageException;
-import ru.topjava.basejava.model.*;
+import ru.topjava.basejava.model.AbstractSection;
+import ru.topjava.basejava.model.ContactType;
+import ru.topjava.basejava.model.Resume;
+import ru.topjava.basejava.model.SectionType;
+import ru.topjava.basejava.util.JsonParser;
 import ru.topjava.basejava.util.SqlHelper;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class SqlStorage implements Storage {
@@ -139,19 +146,7 @@ public class SqlStorage implements Storage {
         String value = result.getString("value_section");
         if (value != null) {
             SectionType sectionType = SectionType.valueOf(result.getString("type_section"));
-            switch (sectionType) {
-                case PERSONAL:
-                case OBJECTIVE:
-                    resume.addSection(sectionType, new TextSection(value));
-                    break;
-                case QUALIFICATIONS:
-                case ACHIEVEMENT:
-                    String[] split = value.split("\n");
-                    resume.addSection(sectionType, new ListSection(Arrays.asList(split)));
-                    break;
-                default:
-                    break;
-            }
+            resume.addSection(sectionType, JsonParser.read(value, AbstractSection.class));
         }
     }
 
@@ -170,23 +165,10 @@ public class SqlStorage implements Storage {
         try (PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO section (value_section, type_section, resume_uuid) VALUES (?,?,?)")) {
             for (Map.Entry<SectionType, AbstractSection> entry : resume.getSections().entrySet()) {
-                SectionType sectionType = entry.getKey();
-                switch (sectionType) {
-                    case OBJECTIVE:
-                    case PERSONAL:
-                        helper.setParam(ps, ((TextSection) entry.getValue()).getData(), entry.getKey().name(), resume.getUuid());
-                        ps.addBatch();
-                        break;
-                    case ACHIEVEMENT:
-                    case QUALIFICATIONS:
-                        List<String> records = ((ListSection) entry.getValue()).getData();
-                        String record = String.join("\n", records);
-                        helper.setParam(ps, record, entry.getKey().name(), resume.getUuid());
-                        ps.addBatch();
-                        break;
-                    default:
-                        break;
-                }
+                ps.setString(1, JsonParser.write(entry.getValue(), AbstractSection.class));
+                ps.setString(2, entry.getKey().name());
+                ps.setString(3, resume.getUuid());
+                ps.addBatch();
             }
             ps.executeBatch();
         }

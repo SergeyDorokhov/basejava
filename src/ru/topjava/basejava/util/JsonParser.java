@@ -13,11 +13,19 @@ public class JsonParser {
             .registerTypeAdapter(AbstractSection.class, new JsonSectionAdapter<Resume>())
             .create();
 
-    public static <T> void write(Resume resume, Writer writer) {
-        gson.toJson(resume, writer);
-    }
-
     public static <T> T read(Reader reader, Class<T> clazz) {
         return gson.fromJson(reader, clazz);
+    }
+
+    public static <T> void write(T object, Writer writer) {
+        gson.toJson(object, writer);
+    }
+
+    public static <T> T read(String content, Class<T> clazz) {
+        return gson.fromJson(content, clazz);
+    }
+
+    public static <T> String write(T object, Class<T> clazz) {
+        return gson.toJson(object, clazz);
     }
 }
