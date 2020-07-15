@@ -28,7 +28,12 @@ public class ResumeServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String uuid = request.getParameter("uuid");
         String fullName = request.getParameter("fullName");
-        Resume resume = storage.get(uuid);
+        Resume resume;
+        if (uuid == null) {
+            resume = new Resume();
+        } else {
+            resume = storage.get(uuid);
+        }
         resume.setFullName(fullName);
         for (ContactType type : ContactType.values()) {
             String value = request.getParameter(type.name());
@@ -106,7 +111,7 @@ public class ResumeServlet extends HttpServlet {
                     AbstractSection section = getEmptySections(sectionType);
                     resume.addSection(sectionType, section);
                 }
-               /* storage.save(resume);*/
+                storage.save(resume);
                 break;
             case "delete":
                 storage.delete(uuid);
