@@ -100,7 +100,6 @@ public class ResumeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String uuid = request.getParameter("uuid");
         String action = request.getParameter("action");
-        String fullName = request.getParameter("fullName");
         Resume resume;
         if (action == null) {
             request.setAttribute("resumes", storage.getAllSorted());
@@ -117,7 +116,6 @@ public class ResumeServlet extends HttpServlet {
                     AbstractSection section = getEmptySections(sectionType);
                     resume.addSection(sectionType, section);
                 }
-                //storage.save();
                 break;
             case "delete":
                 storage.delete(uuid);
