@@ -45,7 +45,7 @@
                 <c:when test="${sectionType=='EDUCATION' || sectionType=='EXPERIENCE'}">
                     <c:forEach var="experience" items="<%=((ExperienceSection) section).getExperiences()%>"
                                varStatus="id">
-                        <p>Организация:</p>
+                        <p><strong>Организация:</strong></p>
                         <p><input type="text" name='${sectionType}' size=100 value="${experience.employerName}"></p>
                         <p>Сайт:</p>
                         <p><input type="text" name='${sectionType}url' size=100 value="${experience.employerSite}"></p>
