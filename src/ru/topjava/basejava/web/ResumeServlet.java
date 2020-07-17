@@ -4,12 +4,14 @@ import ru.topjava.basejava.Config;
 import ru.topjava.basejava.model.*;
 import ru.topjava.basejava.storage.SqlStorage;
 import ru.topjava.basejava.storage.Storage;
+import ru.topjava.basejava.util.DateUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,13 +30,14 @@ public class ResumeServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String uuid = request.getParameter("uuid");
         String fullName = request.getParameter("fullName");
+        final boolean isNewResume = (uuid == null || uuid.length() == 0);
         Resume resume;
-        if (uuid == null) {
-            resume = new Resume();
+        if (isNewResume) {
+            resume = new Resume(fullName);
         } else {
             resume = storage.get(uuid);
+            resume.setFullName(fullName);
         }
-        resume.setFullName(fullName);
         for (ContactType type : ContactType.values()) {
             String value = request.getParameter(type.name());
             if (value != null && value.trim().length() != 0) {
@@ -58,35 +61,38 @@ public class ResumeServlet extends HttpServlet {
                         break;
                     case EXPERIENCE:
                     case EDUCATION:
-                       /* List<Experience> orgs = new ArrayList<>();
-                        String[] urls = request.getParameterValues(type.name() + "url");
-                        for (int i = 0; i < values.length; i++) {
-                            String name = values[i];
-                            if (!HtmlUtil.isEmpty(name)) {
-                                List<Organization.Position> positions = new ArrayList<>();
-                                String pfx = type.name() + i;
-                                String[] startDates = request.getParameterValues(pfx + "startDate");
-                                String[] endDates = request.getParameterValues(pfx + "endDate");
-                                String[] titles = request.getParameterValues(pfx + "title");
-                                String[] descriptions = request.getParameterValues(pfx + "description");
-                                for (int j = 0; j < titles.length; j++) {
-                                    if (!HtmlUtil.isEmpty(titles[j])) {
-                                        positions.add(new Organization.Position(DateUtil.parse(startDates[j]), DateUtil.parse(endDates[j]), titles[j], descriptions[j]));
-                                    }
+                        List<Experience> experiences = new ArrayList<>();
+                        String[] organisations = request.getParameterValues(sectionType.name());
+                        String[] organisationLinks = request.getParameterValues(sectionType.name() + "url");
+                        for (int i = 0; i < organisations.length; i++) {
+                            List<Experience.Position> positions = new ArrayList<>();
+                            String prefix = sectionType.name() + i;
+                            String[] startDates = request.getParameterValues(prefix + "startDate");
+                            String[] finishDates = request.getParameterValues(prefix + "finishDate");
+                            String[] titles = request.getParameterValues(prefix + "title");
+                            String[] descriptions = request.getParameterValues(prefix + "description");
+                            for (int j = 0; j < titles.length; j++) {
+                                if (titles[j] != null) {
+                                    positions.add(new Experience.Position((DateUtil.parse(startDates[j]))
+                                            , DateUtil.parse(finishDates[j]), titles[j], descriptions[j]));
                                 }
-                                orgs.add(new Organization(new Link(name, urls[i]), positions));
                             }
+                            experiences.add(new Experience(organisations[i], organisationLinks[i], positions));
                         }
-                        r.setSection(type, new OrganizationSection(orgs));
+                        resume.addSection(sectionType, new ExperienceSection(experiences));
                         break;
                     default:
-                        break;*/
+                        break;
                 }
             } else {
                 resume.getSections().remove(sectionType);
             }
         }
-        storage.update(resume);
+        if (isNewResume) {
+            storage.save(resume);
+        } else {
+            storage.update(resume);
+        }
         response.sendRedirect("resume");
     }
 
@@ -103,7 +109,7 @@ public class ResumeServlet extends HttpServlet {
         }
         switch (action) {
             case "add":
-                resume = new Resume(fullName);
+                resume = new Resume();
                 for (ContactType contactType : ContactType.values()) {
                     resume.addContact(contactType, "");
                 }
@@ -111,7 +117,7 @@ public class ResumeServlet extends HttpServlet {
                     AbstractSection section = getEmptySections(sectionType);
                     resume.addSection(sectionType, section);
                 }
-                storage.save(resume);
+                //storage.save();
                 break;
             case "delete":
                 storage.delete(uuid);

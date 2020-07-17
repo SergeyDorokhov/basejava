@@ -44,7 +44,7 @@
                 </c:when>
                 <c:when test="${sectionType=='EDUCATION' || sectionType=='EXPERIENCE'}">
                     <c:forEach var="experience" items="<%=((ExperienceSection) section).getExperiences()%>"
-                    >
+                               varStatus="id">
                         <p>Организация:</p>
                         <p><input type="text" name='${sectionType}' size=100 value="${experience.employerName}"></p>
                         <p>Сайт:</p>
@@ -53,16 +53,17 @@
                         <c:forEach var="position" items="${experience.positions}">
                             <jsp:useBean id="position" type="ru.topjava.basejava.model.Experience.Position"/>
                             <p>с:
-                                <input type="text" name="${sectionType}startDate" size=10
+                                <input type="text" name="${sectionType}${id.index}startDate" size=10
                                        value="<%=(DateUtil.format(position.getStartDate()))%>">
                                 по:
-                                <input type="text" name="${sectionType}finishDate" size=10
+                                <input type="text" name="${sectionType}${id.index}finishDate" size=10
                                        value="<%=(DateUtil.format(position.getFinishDate()))%>">
                             </p>
                             <p>Должность:</p>
-                            <input type="text" name='${sectionType}title' size=100 value="${position.position}">
+                            <input type="text" name='${sectionType}${id.index}title' size=100
+                                   value="${position.position}">
                             <p>Должностные обязанности:</p>
-                            <textarea name="${sectionType}$description" rows=4
+                            <textarea name="${sectionType}${id.index}description" rows=4
                                       cols=100>${position.description}</textarea>
 
                         </c:forEach>
