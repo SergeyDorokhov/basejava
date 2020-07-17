@@ -65,13 +65,10 @@
                             <p>Должностные обязанности:</p>
                             <textarea name="${sectionType}${id.index}description" rows=4
                                       cols=100>${position.description}</textarea>
-
                         </c:forEach>
                         </div>
                     </c:forEach>
                 </c:when>
-
-
             </c:choose>
         </c:forEach>
         <p>

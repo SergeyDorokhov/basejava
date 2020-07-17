@@ -17,7 +17,6 @@ import java.util.List;
 
 public class ResumeServlet extends HttpServlet {
     private Storage storage;
-    //private Resume emptyResume = new Resume();
 
     @Override
     public void init() {
@@ -110,15 +109,7 @@ public class ResumeServlet extends HttpServlet {
         }
         switch (action) {
             case "add":
-               resume = getEmptyResume();
-/*                resume = new Resume();
-                for (ContactType contactType : ContactType.values()) {
-                    resume.addContact(contactType, "");
-                }
-                for (SectionType sectionType : SectionType.values()) {
-                    AbstractSection section = getEmptySections(sectionType);
-                    resume.addSection(sectionType, section);
-                }*/
+                resume = getEmptyResume();
                 break;
             case "delete":
                 storage.delete(uuid);
@@ -146,58 +137,24 @@ public class ResumeServlet extends HttpServlet {
                             break;
                         case EXPERIENCE:
                         case EDUCATION:
-                            ExperienceSection orgSection = (ExperienceSection) section;
-                            List<Experience> emptyFirstOrganizations = new ArrayList<>();
-                            emptyFirstOrganizations.add(new Experience(""
+                            ExperienceSection experienceSection = (ExperienceSection) section;
+                            List<Experience> experiences = new ArrayList<>();
+                            experiences.add(new Experience(""
                                     , "", new Experience.Position()));
-                            if (orgSection != null) {
-                                for (Experience org : orgSection.getExperiences()) {
+                            if (experienceSection != null) {
+                                for (Experience experience : experienceSection.getExperiences()) {
                                     List<Experience.Position> emptyFirstPositions = new ArrayList<>();
-                                    //emptyFirstPositions.add( new Experience.Position());
-                                    emptyFirstPositions.addAll(org.getPositions());
-                                    emptyFirstOrganizations.add(new Experience(org.getEmployerName()
-                                            , org.getEmployerSite(), emptyFirstPositions));
+                                    emptyFirstPositions.addAll(experience.getPositions());
+                                    experiences.add(new Experience(experience.getEmployerName()
+                                            , experience.getEmployerSite(), emptyFirstPositions));
                                 }
                             }
-                            section = new ExperienceSection(emptyFirstOrganizations);
+                            section = new ExperienceSection(experiences);
                             break;
                     }
                     resume.addSection(type, section);
                 }
                 break;
-              /*  resume = storage.get(uuid);
-                for (SectionType sectionType : SectionType.values()) {
-                    AbstractSection section = resume.getSections().get(sectionType);
-                    if (section == null) {
-                        section = getEmptySections(sectionType);
-                    } else {
-                        switch (sectionType) {
-                            case EXPERIENCE:
-                            case EDUCATION:
-                                ExperienceSection orgSection = (ExperienceSection) section;
-                                List<Experience> emptyFirstOrganizations = new ArrayList<>();
-                                emptyFirstOrganizations.add(new Experience(""
-                                        , "", new Experience.Position()));
-                                if (orgSection != null) {
-                                    for (Experience org : orgSection.getExperiences()) {
-                                        List<Experience.Position> emptyFirstPositions = new ArrayList<>();
-                                        emptyFirstPositions.add(new Experience.Position());
-                                        emptyFirstPositions.addAll(org.getPositions());
-                                        emptyFirstOrganizations.add(new Experience(org.getEmployerName(),
-                                                org.getEmployerSite(), emptyFirstPositions));
-                                    }
-                                }
-                                section = new ExperienceSection(emptyFirstOrganizations);
-                                break;
-                            default:
-                                break;
-                        }
-
-                    }
-                    resume.addSection(sectionType, section);
-                }
-
-                break;*/
             default:
                 throw new IllegalArgumentException("Action " + action + " is illegal");
         }
@@ -218,26 +175,4 @@ public class ResumeServlet extends HttpServlet {
                 , "", new Experience.Position())));
         return resume;
     }
-
-/*    private AbstractSection getEmptySections(SectionType sectionType) {
-        AbstractSection section;
-        switch (sectionType) {
-            case PERSONAL:
-            case OBJECTIVE:
-                section = new TextSection("");
-                break;
-            case ACHIEVEMENT:
-            case QUALIFICATIONS:
-                section = new ListSection("");
-                break;
-            case EDUCATION:
-            case EXPERIENCE:
-                section = new ExperienceSection(new Experience(""
-                        , "", new Experience.Position()));
-                break;
-            default:
-                throw new IllegalArgumentException("SectionType " + sectionType + " is illegal");
-        }
-        return section;
-    }*/
 }

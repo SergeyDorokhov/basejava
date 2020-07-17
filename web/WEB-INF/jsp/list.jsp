@@ -36,8 +36,7 @@
             </tr>
         </c:forEach>
     </table>
-    <p><a href="resume?&action=add">Добавить резюме</a></p>
-
+    <p><a href="resume?action=add">Добавить резюме</a></p>
 </section>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
