@@ -73,7 +73,7 @@
         </c:forEach>
         <p>
             <button type="submit">Сохранить</button>
-            <button onclick="window.history.back()">Отменить</button>
+            <button type="button" onclick="window.history.back()">Отменить</button>
         </p>
     </form>
 </section>
